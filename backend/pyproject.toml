@@ -1,0 +1,104 @@
+[project]
+name = "machine-copilot-backend"
+version = "0.1.0"
+description = "Proactive Edge-to-Voice Machine Copilot Backend"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.6.0",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30.0",
+    "alembic>=1.13.3",
+    "arq>=0.26.1",
+    "redis>=5.2.0",
+    "pgvector>=0.3.6",
+    "structlog>=24.4.0",
+    "httpx>=0.27.2",
+    "pypdf>=5.1.0",
+    "argon2-cffi>=23.1.0",
+    "pyjwt>=2.9.0",
+    "python-multipart>=0.0.17",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.3",
+    "pytest-asyncio>=0.24.0",
+    "respx>=0.22.0",
+    "ruff>=0.7.2",
+    "mypy>=1.13.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "SIM",  # flake8-simplify
+    "ASYNC",# flake8-async
+    "S",    # flake8-bandit
+    "RUF",  # Ruff-specific rules
+]
+ignore = [
+    "B008", # allow Depends() in argument defaults (standard FastAPI pattern)
+    "S101", # allow assert in tests
+    "S104", # possible binding to all interfaces (used in container dev server)
+    "S105", # possible hardcoded password check
+    "S106", # possible hardcoded password arg
+]
+
+[tool.ruff.lint.per-file-ignores]
+"migrations/*" = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = [
+    "arq.*",
+    "pypdf.*",
+    "pgvector.*",
+    "argon2.*",
+    "respx.*"
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+asyncio_default_fixture_loop_scope = "function"
+
