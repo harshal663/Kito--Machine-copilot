@@ -1,10 +1,12 @@
 # Proactive Edge-to-Voice Machine Copilot
 
-Prevent unplanned downtime in small manufacturing units by detecting early machine faults at the edge and proactively reaching the shift supervisor by phone with a plain-language diagnosis.
+> **Edge Vibration Anomaly Detection • Cloudflare Workers AI (Llama 3.1 8B) • Proactive Voice Phone Dispatch (Bolna AI)**
+
+Prevent catastrophic unplanned downtime on factory floors by detecting early mechanical anomalies at the edge (ESP32 FFT) and proactively placing phone calls to the shift supervisor in plain conversational language before machines fail.
 
 ---
 
-## 1. System Overview & Architecture
+## 1. System Architecture
 
 ```mermaid
 flowchart LR
@@ -20,8 +22,8 @@ flowchart LR
   subgraph Web ["Operator UI"]
     FE["Next.js 15 App Router (Port 3000)"]
   end
-  subgraph Integrations ["External Platforms (Mockable)"]
-    LLM["Llama 3 (Groq API)"]
+  subgraph Integrations ["External Platforms (Live or Mock)"]
+    LLM["Llama 3.1 8B (Cloudflare Workers AI)"]
     BOLNA["Bolna Voice Agent Platform"]
     PHONE["Supervisor Phone (+91...)"]
     NOTIF["Twilio SMS Fallback"]
@@ -30,7 +32,7 @@ flowchart LR
   ESP -- "POST /v1/telemetry (JSON <=512B)" --> API
   API -- "Lock & Enqueue" --> RD
   W -- "RAG Vector Query" --> PG
-  W -- "Structured JSON Prompt" --> LLM
+  W -- "Direct Async HTTP" --> LLM
   W -- "Outbound Call" --> BOLNA
   BOLNA -- "Spoken Voice Call" --> PHONE
   BOLNA -- "Signed Webhook" --> API
@@ -39,161 +41,184 @@ flowchart LR
   W -- "Escalation SMS" --> NOTIF
 ```
 
-- **Edge (Firmware):** ESP32 + MPU6050 sampling at 1000 Hz, pure iterative Radix-2 512-point FFT with Hann windowing, Welford running baseline calibration, $k\sigma$ persistence detection, and compact JSON payloads ($\le 512$ bytes).
-- **API & Core:** Python 3.12 + FastAPI with strict ULID IDs (`mch_`, `dev_`, `evt_`, `cal_`, `not_`, `man_`, `usr_`), rate limiting (6/min per device), daily call caps (5/day per machine), 30-minute cooldowns, and HMAC-SHA256 signature verification.
-- **Worker Pipeline:** Python 3.12 + `arq` async queue orchestrating pgvector RAG manual chunk retrieval, LLM synthesis with rule-based fallback, outbound Bolna phone calls, no-answer retries, and SMS escalation.
-- **Dashboard:** TypeScript + Next.js 15 (App Router) + Tailwind CSS + Lucide icons with real-time SSE stream reconnection, live presence badges, interactive FFT spectrum charts, and supervisory decision controls.
+### Key Technical Pillars
+- **Firmware (Edge Node):** ESP32 sampling at 1000 Hz, iterative Radix-2 512-point FFT with Hann windowing, Welford running baseline tracking, and $k\sigma$ persistence detection.
+- **Backend API & Queue:** Python 3.12 + FastAPI + `arq` async queue on Redis, strict prefixed ULIDs (`mch_`, `dev_`, `evt_`, `cal_`, `usr_`), 30-minute deduplication cooldowns, and monotonic sequence checking.
+- **AI Diagnostics:** **Llama 3.1 8B Instruct** hosted on **Cloudflare Workers AI**.
+  > **Note on LLM Architecture:** We do **not** use the heavy `openai` Python SDK. Model inference is executed via clean, high-performance async HTTP requests through Python's native `httpx.AsyncClient` directly to Cloudflare's native Workers AI endpoint (`POST https://api.cloudflare.com/client/v4/accounts/{id}/ai/run/{model}`).
+- **Voice Dispatch:** Proactive outbound calls via **Bolna AI** communicating machine diagnostics, recommended actions, and capturing supervisor decisions directly on the phone call.
+- **Dashboard:** TypeScript + Next.js 15 App Router + Tailwind CSS with live Server-Sent Events (SSE), theme switching (light/dark), and supervisory decision controls.
+- **Safety Invariant:** Software strictly advises and logs; it **never** actuates physical machine controls.
 
 ---
 
-## 2. Quickstart & Demo Setup
+## 2. Judge & Evaluator Guide: Quickstart
+
+You can test and evaluate the entire application in two modes:
+1. **Mode A (Default - 100% Offline / Zero API Keys Required):** Runs immediately with mock external providers. No paid tokens or credit cards needed.
+2. **Mode B (Live Mode - Real Cloudflare & Bolna):** Plug in your API keys in `.env` to experience live Llama 3.1 diagnosis and real phone calls to your mobile.
+
+---
 
 ### Prerequisites
-- Docker & Docker Compose
-- Python 3.12+ and `uv` package manager
-- Node.js 20+ and `npm`
-- MinGW `g++` (for native firmware host tests) or PlatformIO
+- [Docker & Docker Compose](https://www.docker.com/) (for PostgreSQL with `pgvector` & Redis)
+- [Python 3.12+](https://www.python.org/) with [`uv`](https://docs.astral.sh/uv/) package manager
+- [Node.js 20+](https://nodejs.org/) with `npm`
+- (Optional) `g++` (MinGW on Windows or GCC on Linux) to execute native firmware tests
 
-### Step 1: Clone and Configure Environment
+---
+
+### Step-by-Step Setup
+
+#### 1. Clone & Configure Environment
 ```bash
+git clone https://github.com/harshal663/Kito--Machine-copilot.git
+cd Kito--Machine-copilot
+
+# Copy the configuration template
 cp .env.example .env
 ```
-Default configuration is set to `MOCK_EXTERNALS=true`, allowing the full stack and test scenarios to run entirely offline with zero external API dependencies.
 
-### Step 2: Start Infrastructure Services
+> **Evaluation Setting:**
+> - To run **offline (recommended for quick evaluation)**: Leave `MOCK_EXTERNALS=true` in `.env`.
+> - To run **live**: Set `MOCK_EXTERNALS=false` and provide `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_AUTH_TOKEN`, and `BOLNA_API_KEY`.
+
+#### 2. Start Database and Cache (Docker)
+In your terminal, start PostgreSQL 16 (with `pgvector`) and Redis 7:
 ```bash
-make up
-# Starts PostgreSQL 16 (with pgvector) and Redis 7 in Docker containers
+docker compose up -d postgres redis
 ```
 
-### Step 3: Run Database Migrations
+#### 3. Run Migrations & Seed Demo Factory
 ```bash
-make migrate
-# Applies Alembic migration 0001_initial: tables, enums, pgvector extension, and HNSW cosine indexes
-```
+# Apply database migrations
+cd backend
+uv run alembic upgrade head
 
-### Step 4: Seed Demo Data
-```bash
-make seed
-# Seeds owner@example.com (Password123!), "Centrifugal Slurry Pump #3", and bound sensor node
+# Seed initial owner, machine, and device bindings
+uv run python ../scripts/seed_demo.py
+cd ..
 ```
-
-### Step 5: Start Backend API Server
-```bash
-make api
-# Runs FastAPI on http://localhost:8000 (OpenAPI docs at /docs)
-```
-
-### Step 6: Start Background Worker
-In a separate terminal:
-```bash
-make worker
-# Runs arq worker for RAG, LLM synthesis, voice dispatch, and escalation
-```
-
-### Step 7: Start Dashboard Frontend
-In a separate terminal:
-```bash
-make dev
-# Runs Next.js App Router on http://localhost:3000
-```
-Login with:
+*Demo credentials seeded:*
 - **Email:** `owner@example.com`
 - **Password:** `Password123!`
 
 ---
 
-## 3. Mock Mode Configuration Switches
+### Running the Services
 
-| Variable | Values | Default | Purpose |
-|----------|--------|---------|---------|
-| `MOCK_EXTERNALS` | `true`, `false` | `true` | When true, LLM, Bolna, and Twilio bypass real APIs and record calls/SMS to Redis. |
-| `MOCK_LLM_MODE` | `valid`, `invalid`, `timeout` | `valid` | Simulates LLM responses (`valid` JSON, `invalid` non-JSON triggering rule fallback, `timeout` triggering arq retries). |
-| `EMBEDDING_BACKEND` | `hash`, `local` | `hash` | `hash` uses deterministic 384-dimensional token hashing for fast offline tests; `local` loads HuggingFace `bge-small-en-v1.5`. |
-| `NOTIFY_PROVIDER` | `mock`, `twilio` | `mock` | `mock` pushes SMS records to Redis `mock:notifications`; `twilio` dispatches real SMS. |
+Open 3 terminal windows to run the full stack:
 
----
-
-## 4. Test Suites & Verification
-
-### Run Acceptance Scenarios S1–S10 (End-to-End)
+#### Terminal 1: Backend API Server
 ```bash
-make e2e
-# Or: uv run --directory backend python ../simulator/run_scenario.py
+cd backend
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
-Validates:
-1. `[S1]` Onboarding: User login, machine creation, device binding, 409 conflict.
-2. `[S2]` Heartbeat & Config: 204 response, machine device_online presence, device config parameters.
-3. `[S3]` Anomaly to Call: Telemetry 202 accepted, worker processing, CALLING status, `mock:calls` record.
-4. `[S4]` Decision by Voice: HMAC-SHA256 signed webhook, ACKNOWLEDGED transition, audit log trail.
-5. `[S5]` Cooldown & Daily Cap: 30-min suppression, exactly 5 accepted events per day.
-6. `[S6]` Duplicate Sequence: Idempotent seq=999 returns identical event_id without duplicate event.
-7. `[S7]` Webhook Security: Signature mismatch returns 401 WEBHOOK_SIGNATURE_INVALID.
-8. `[S8]` Ownership & Fallback: Cross-owner queries return 404; invalid LLM triggers rule fallback.
-9. `[S9]` Escalation & Notification: NO_ANSWER retries exhausted, event ESCALATED, SMS dispatched.
-10. `[S10]` Contract Verification: OpenAPI schema and generated TypeScript types match contract.
+*API is live at [http://localhost:8000](http://localhost:8000). Interactive Swagger docs at [http://localhost:8000/docs](http://localhost:8000/docs).*
 
-### Backend Unit & Integration Tests
+#### Terminal 2: Background Worker (AI Synthesis & Voice Dispatch)
 ```bash
-make test-unit
-# Runs pytest on backend/tests/unit (core utils, rules, state machine, embedding, schemas)
-
-make test-integration
-# Runs pytest on backend/tests/integration (DB migrations, API core, telemetry ingest, webhooks, RAG)
+cd backend
+uv run arq app.workers.settings.WorkerSettings
 ```
+*Processes RAG retrieval, runs Llama 3.1 diagnosis, and dispatches Bolna calls.*
 
-### Frontend Tests, Typecheck & Production Build
+#### Terminal 3: Frontend Dashboard
 ```bash
 cd frontend
-npm run typecheck   # 0 TypeScript errors
-npm test            # 17 Vitest unit & component tests passing
-npm run build       # Next.js production build succeeded
+npm install
+npm run dev
 ```
-
-### Firmware Native Tests (Host Compile)
-```bash
-make firmware-test
-# Compiles firmware/test/test_native with MinGW g++ C++17 and executes Unity test suite:
-# - Radix-2 512-point FFT peak accuracy (24.4 Hz fundamental)
-# - Welford baseline convergence (mean & variance)
-# - Persistence counter & idle thresholding (<0.05g)
-# - Compact telemetry JSON serialization (<= 512 bytes)
-# - Rule hint generation for 1x imbalance, 2x misalignment, harmonics
-```
+*Dashboard opens at [http://localhost:3000](http://localhost:3000).*
 
 ---
 
-## 5. Device Simulator & Tooling
+## 3. Guided Walkthrough for Evaluators
 
-### ESP32 Device Simulator
-Simulates real vibration bursts or heartbeats:
+### Step 1: Sign In & Explore
+1. Navigate to [http://localhost:3000](http://localhost:3000).
+2. Sign in with:
+   - **Email:** `owner@example.com`
+   - **Password:** `Password123!`
+3. Notice the 4 stat cards (Machines, Healthy, Open Alerts, Offline Devices), the 14-day alert frequency chart, and the 24-hour vibration RMS trend chart.
+
+### Step 2: Trigger a Simulated Vibration Anomaly
+Open a new terminal and simulate an ESP32 sensor reporting a critical mechanical imbalance fault (1x fundamental frequency peak at 24.4 Hz):
 ```bash
-# Send an imbalance anomaly burst (1x peak dominant at 24.4 Hz)
 uv run python simulator/simulate_device.py --mode imbalance --rpm 1465.0
-
-# Send healthy vibration baseline burst
-uv run python simulator/simulate_device.py --mode healthy
-
-# Send periodic heartbeat
-uv run python simulator/simulate_device.py --heartbeat
 ```
 
-### Fake Bolna Webhook Dispatcher
-Dispatches HMAC-SHA256 signed webhooks simulating supervisor phone call decisions:
-```bash
-# Simulate supervisor acknowledging alert on call
-uv run python simulator/fake_bolna_webhook.py --event-id evt_01... --decision ACKNOWLEDGED
+### Step 3: Observe Live Reactions Across the Stack
+1. **API Ingestion:** Receives telemetry, verifies device authentication, checks the 30-minute cooldown, and returns `202 Accepted`.
+2. **Worker AI Diagnosis:** The worker queries manual chunks via `pgvector`, runs Llama 3.1 8B diagnostic synthesis, and outputs:
+   - Ranked probable causes (e.g., *Spindle bearing wear / Mechanical unbalance*).
+   - Severity rating (`HIGH`).
+   - Plain-language spoken voice summary.
+3. **Voice Dispatch:** Bolna calls the machine supervisor or records a simulated voice dispatch.
+4. **Live Dashboard Update:** Watch the Dashboard update **in real time** via Server-Sent Events (SSE)—no page refresh required!
 
-# Simulate call failure / no answer
-uv run python simulator/fake_bolna_webhook.py --event-id evt_01... --status no-answer
-```
+### Step 4: Operator Supervisory Decision
+1. Click on the active alert in the dashboard.
+2. Review the AI diagnosis, confidence metrics, and technical manual citations.
+3. Select an action (**Acknowledge**, **Schedule Inspection**, or **Request Shutdown**).
+4. An immutable audit log record is committed to PostgreSQL in the same database transaction.
 
-### Device Key Management Script
+---
+
+## 4. Environment Variables Reference
+
+| Variable | Description | Default / Example |
+|---|---|---|
+| `MOCK_EXTERNALS` | Run offline without paid external APIs | `true` |
+| `DATABASE_URL` | PostgreSQL asyncpg connection string | `postgresql+asyncpg://copilot:copilot@localhost:5432/copilot` |
+| `REDIS_URL` | Redis URL for caching, queues, and pub/sub | `redis://localhost:6379/0` |
+| `JWT_SECRET` | Secret key used to sign JWT tokens | `change-me-to-at-least-32-random-characters-secret` |
+| `LLM_PROVIDER` | LLM provider (`cloudflare` or `mock`) | `cloudflare` |
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare Account ID for Workers AI | Hexadecimal account string |
+| `CLOUDFLARE_AUTH_TOKEN` | Scoped API token with Workers AI read/write | Bearer token |
+| `LLM_MODEL` | Cloudflare Llama 3.1 8B model identifier | `@cf/meta/llama-3.1-8b-instruct-fp8` |
+| `VOICE_PROVIDER` | Voice provider (`bolna` or `mock`) | `bolna` |
+| `BOLNA_API_KEY` | Bolna voice platform API key | `bolna_...` |
+| `BOLNA_AGENT_ID` | Bolna voice agent ID configured with prompt | `agent_...` |
+| `BOLNA_WEBHOOK_TOKEN` | Shared secret token for webhook verification | Random 32+ character string |
+
+---
+
+## 5. Verification & Test Suites
+
+The repository contains automated verification suites spanning firmware, backend, frontend, and security:
+
 ```bash
-uv run python scripts/create_device_key.py --machine-id mch_01...
-# Generates a fresh device ID and secure dk_... raw key, storing Argon2id hash in Postgres
+# 1. Backend Lint & Formatting (Ruff)
+cd backend && uv run ruff check . && uv run ruff format --check .
+
+# 2. Strict Typecheck (mypy strict mode - 0 errors across 72 source files)
+cd backend && uv run mypy --strict app
+
+# 3. Backend Unit Tests
+cd backend && uv run pytest tests/unit
+
+# 4. Frontend Typecheck & Vitest Tests
+cd frontend
+npm run typecheck    # 0 TypeScript errors
+npm test             # 17 unit & component tests passing
+
+# 5. Native Firmware Tests (5 Unity tests)
+cd firmware
+g++ -std=c++17 -D UNIT_TEST -I include -I src -I test/test_native test/test_native/test_main.cpp src/baseline.cpp src/detector.cpp src/fft_analyzer.cpp src/telemetry_client.cpp -o test_runner
+./test_runner        # 5 Tests 0 Failures
 ```
 
 ---
 
+## 6. Repository Structure
 
+```
+├── firmware/          # ESP32 C++ firmware: FFT analyzer, baseline, detector, telemetry client
+├── backend/           # Python 3.12 FastAPI API, arq background workers, RAG pgvector pipeline
+├── frontend/          # Next.js 15 App Router dashboard, Tailwind CSS, SSE client
+├── simulator/         # Hardware vibration anomaly & heartbeat simulator
+├── scripts/           # DB seed scripts, OpenAPI exporters, password reset utilities
+├── docs/final/        # Technical specifications (ARCHITECTURE.md, MODEL.md, SECURITY.md)
+└── .github/workflows/ # GitHub Actions automated CI verification pipeline
+```
