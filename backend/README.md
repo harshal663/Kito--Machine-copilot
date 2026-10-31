@@ -12,3 +12,4 @@ Backend API and background worker for the Proactive Edge-to-Voice Machine Copilo
 uv sync
 uv run uvicorn app.main:app --reload
 ```
+
