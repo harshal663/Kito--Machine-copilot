@@ -196,11 +196,4 @@ uv run python scripts/create_device_key.py --machine-id mch_01...
 
 ---
 
-## 6. Project Documentation Reference
 
-- [ARCHITECTURE.md](docs/ARCHITECTURE.md): Complete system blueprint, database DDL, Redis keys, event state transitions, error codes, and API contracts.
-- [PRODUCT_REQUIREMENTS.md](docs/PRODUCT_REQUIREMENTS.md): Functional requirements FR-1 through FR-53 and Acceptance Scenarios S1 through S10.
-- [CONTEXT_MAP.md](docs/CONTEXT_MAP.md): Bounded contexts, edge-to-cloud mapping, and subsystem boundaries.
-- [STANDARDS.md](docs/STANDARDS.md): Strict engineering standards: database rules, concurrency, type safety, and zero regressions.
-- [BUILD_NOTES.md](docs/BUILD_NOTES.md): Design decisions recorded during build phases.
-- [BUILD_REPORT.md](BUILD_REPORT.md): Final verification audit report covering Definition of Done checks D1–D10.

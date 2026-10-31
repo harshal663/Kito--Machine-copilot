@@ -53,4 +53,3 @@ async def upsert_factory_for_owner(
 
     await session.flush()
     return factory
-

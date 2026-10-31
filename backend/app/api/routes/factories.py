@@ -55,4 +55,3 @@ async def create_or_update_factory(
     )
     await session.commit()
     return _to_factory_out(factory)
-

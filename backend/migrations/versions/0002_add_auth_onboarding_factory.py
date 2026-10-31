@@ -59,4 +59,3 @@ def upgrade() -> None:
 def downgrade() -> None:
     for stmt in DOWN_STATEMENTS:
         op.execute(stmt)
-

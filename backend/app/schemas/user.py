@@ -30,4 +30,3 @@ class UserUpdateIn(BaseModel):
         description="E.164 international phone number format (e.g. +919876543210)",
     )
     language: Literal["en", "hi"] | None = None
-

@@ -51,4 +51,3 @@ class FactoryOut(BaseModel):
     gstin: str | None = None
     created_at: datetime
     updated_at: datetime
-

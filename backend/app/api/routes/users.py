@@ -49,4 +49,3 @@ async def update_my_profile(
     )
     await session.commit()
     return _to_user_out(updated)
-

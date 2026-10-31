@@ -80,3 +80,20 @@ docs/PRODUCT_REQUIREMENTS.md
 docs/BUILD_NOTES.md
 docs/CONTEXT_MAP.md
 docs/DESIGN_NOTES.md
+docs/final/ARCHITECTURE.md
+docs/final/bolna-backend.md
+docs/final/BOLNA.md
+docs/final/MODEL.md
+docs/final/FRONTEND.md
+docs/final/COTEXT_MAP.md
+docs/final/PRD.md
+docs/final/PROMPT.md
+docs/final/SECURITY.md
+docs/final/STANDARDS.md
+docs/final/STATUS.md
+docs/final/CONTEXT_MAP.md
+
+
+# Nice to ignore
+.agents
+.github

@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     BOLNA_AGENT_ID: str = ""
     BOLNA_WEBHOOK_SECRET: str = "change-me"
     BOLNA_SIGNATURE_HEADER: str = "X-Bolna-Signature"
-    NOTIFY_PROVIDER: Literal["mock", "twilio"] = "mock"
+    NOTIFY_PROVIDER: Literal["mock", "fake", "twilio"] = "fake"
     TWILIO_ACCOUNT_SID: str = ""
     TWILIO_AUTH_TOKEN: str = ""
     TWILIO_FROM_NUMBER: str = ""

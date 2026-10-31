@@ -7,4 +7,3 @@ class OnboardingCompleteIn(BaseModel):
     """Payload to complete the onboarding process."""
 
     machines_skipped: bool = False
-

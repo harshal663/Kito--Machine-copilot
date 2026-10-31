@@ -1,12 +1,13 @@
 """Smoke test for Cloudflare Workers AI. Not used by the app. Do not commit output."""
 
 import os
-from dotenv import load_dotenv
 import sys
 
-load_dotenv()
-
 import requests
+from dotenv import load_dotenv
+import requests
+
+load_dotenv()
 
 ACCOUNT_ID = os.environ["CLOUDFLARE_ACCOUNT_ID"]
 AUTH_TOKEN = os.environ["CLOUDFLARE_AUTH_TOKEN"]
