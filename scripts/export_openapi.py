@@ -16,8 +16,9 @@ def export_openapi() -> None:
     output_path = Path(__file__).resolve().parents[1] / "docs" / "openapi.json"
     openapi_schema = app.openapi()
 
-    with open(output_path, "w", encoding="utf-8") as f:
+    with open(output_path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(openapi_schema, f, indent=2)
+        f.write("\n")
 
     print(f"OpenAPI spec successfully exported to {output_path}")
 

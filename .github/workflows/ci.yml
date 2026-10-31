@@ -19,7 +19,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U copilot -d copilot_test"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -94,6 +94,8 @@ jobs:
         run: cd frontend && npm test
 
       - name: Frontend build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:8000
         run: cd frontend && npm run build
 
   contract:
