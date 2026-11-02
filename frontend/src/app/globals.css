@@ -54,6 +54,7 @@
     /* Industrial status (text colour, text-on-surface colour, surface) */
     --status-healthy: #059669;
     --status-healthy-text: #065f46;
+ 
     --status-healthy-bg: #ecfdf5;
     --status-alert: #e11d48;
     --status-alert-text: #9f1239;
