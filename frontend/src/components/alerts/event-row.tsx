@@ -1,7 +1,10 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { AlertTriangle, ArrowRight, Calendar } from "lucide-react";
 import type { EventSummary } from "@/types";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/shell/status-badge";
 import { formatDecimal, formatISTDateTime } from "@/lib/format";
 
 export interface EventRowProps {
@@ -9,67 +12,58 @@ export interface EventRowProps {
 }
 
 export function EventRow({ event }: EventRowProps) {
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case "ACKNOWLEDGED":
-      case "INSPECTION_SCHEDULED":
-        return "success";
-      case "SHUTDOWN_REQUESTED":
-      case "ESCALATED":
-      case "FAILED":
-        return "danger";
-      case "CALLING":
-      case "RETRYING":
-      case "DIAGNOSING":
-      case "ANOMALY_DETECTED":
-        return "warning";
-      default:
-        return "secondary";
-    }
-  };
-
-  const getSeverityBadgeVariant = (severity?: string | null) => {
-    switch (severity) {
-      case "HIGH":
-        return "danger";
-      case "MEDIUM":
-        return "warning";
-      case "LOW":
-        return "default";
-      default:
-        return "secondary";
-    }
-  };
-
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 transition-colors gap-3">
-      <div className="space-y-1">
-        <div className="flex items-center space-x-2">
-          <Badge variant={getStatusBadgeVariant(event.status)} className="font-mono text-[11px]">
-            {event.status}
-          </Badge>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 border border-slate-200/90 rounded-2xl bg-white hover:bg-slate-50/80 transition-all gap-4 shadow-sm">
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusBadge status={event.status} />
+
           {event.severity && (
-            <Badge variant={getSeverityBadgeVariant(event.severity)} className="text-[11px]">
+            <span
+              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                event.severity === "HIGH"
+                  ? "bg-rose-50 text-rose-700 border border-rose-200"
+                  : event.severity === "MEDIUM"
+                  ? "bg-orange-50 text-orange-700 border border-orange-200"
+                  : "bg-amber-50 text-amber-700 border border-amber-200"
+              }`}
+            >
+              <AlertTriangle className="h-3 w-3" />
               {event.severity}
-            </Badge>
+            </span>
           )}
-          <span className="text-xs text-slate-500">{formatISTDateTime(event.created_at)}</span>
+
+          <span className="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-lg">
+            #{event.id.slice(0, 8).toUpperCase()}
+          </span>
+
+          <span className="text-xs text-slate-500 flex items-center gap-1">
+            <Calendar className="h-3 w-3 text-slate-400" />
+            <time dateTime={event.created_at}>{formatISTDateTime(event.created_at)}</time>
+          </span>
         </div>
 
-        <div className="flex items-center space-x-4 text-xs text-slate-600 pt-1">
-          <span>
-            Vibration RMS: <strong>{formatDecimal(event.rms_g, 3)} g</strong>
+        <div className="flex items-center gap-4 text-xs text-slate-600">
+          <span className="flex items-center gap-1.5">
+            <span className="text-slate-400">Vibration RMS:</span>
+            <strong data-metric className="font-semibold text-slate-900 tabular-nums">
+              {formatDecimal(event.rms_g, 3)} g
+            </strong>
           </span>
-          <span>
-            Z-Score: <strong>+{formatDecimal(event.z_score, 1)}σ</strong>
+          <span className="flex items-center gap-1.5">
+            <span className="text-slate-400">Z-Score:</span>
+            <strong data-metric className="font-semibold text-[#ff5733] tabular-nums">
+              +{formatDecimal(event.z_score, 1)}σ
+            </strong>
           </span>
         </div>
       </div>
 
-      <div className="flex items-center justify-end">
+      <div className="flex items-center sm:justify-end">
         <Link href={`/events/${event.id}`}>
-          <button className="text-xs font-semibold text-blue-600 hover:text-blue-800 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center">
-            View Diagnosis & Decision →
+          <button className="text-xs font-semibold text-slate-700 hover:text-[#ff5733] py-2 px-3 rounded-xl border border-slate-200 bg-white hover:bg-orange-50/40 hover:border-orange-200 transition-all flex items-center gap-1.5">
+            View Diagnosis & Decision
+            <ArrowRight className="h-3.5 w-3.5 text-[#ff5733]" />
           </button>
         </Link>
       </div>

@@ -15,7 +15,11 @@ export function AppShell({ children, title }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
+    <div className="flex min-h-screen bg-[#f7f7f8] text-slate-900" data-testid="app-shell">
+      <a className="skip-link" href="#main">
+        Skip to content
+      </a>
+
       {/* Desktop sidebar */}
       <div className="hidden lg:flex shrink-0">
         <Sidebar
@@ -32,8 +36,8 @@ export function AppShell({ children, title }: AppShellProps) {
       {/* Main content body */}
       <div className="flex flex-1 flex-col overflow-x-hidden">
         <Header title={title} onOpenMobileMenu={() => setMobileOpen(true)} />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-[1200px] space-y-6">
+        <main id="main" tabIndex={-1} className="flex-1 p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto w-full max-w-[1240px] space-y-6">
             {children}
           </div>
         </main>
@@ -41,4 +45,3 @@ export function AppShell({ children, title }: AppShellProps) {
     </div>
   );
 }
-

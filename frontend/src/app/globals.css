@@ -1,138 +1,269 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------
+ * 1. Tokens (Light Theme Only)
+ * ------------------------------------------------------------------ */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    --background: 40 13% 97%;           /* Soft warm light canvas */
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
+    /* Brand Coral Accent */
+    --primary: 12 100% 60%;             /* Coral #ff5733 */
+    --primary-foreground: 0 0% 100%;    /* Crisp White */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 13% 94%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 220 13% 93%;
+    --muted-foreground: 215 16% 42%;
+    --accent: 12 100% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --border: 220 13% 88%;
+    --input: 220 13% 78%;
+    --ring: 12 100% 60%;
+    --radius: 0.75rem;                  /* 12px for modern soft corners */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Layout */
+    --sidebar-width: 16rem;
+    --sidebar-collapsed-width: 4.5rem;
+    --header-height: 3.5rem;
+    --touch-min: 44px;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Typography */
+    --font-sans: "Inter", "Noto Sans Devanagari", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-serif: "Playfair Display", Georgia, "Times New Roman", serif;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    /* Chart sequence */
+    --chart-1: 12 100% 60%;             /* Coral */
+    --chart-2: 173 80% 40%;             /* Teal */
+    --chart-3: 35 95% 55%;              /* Amber */
+    --chart-4: 210 100% 56%;            /* Blue */
+    --chart-5: 270 70% 65%;             /* Purple */
 
-    --radius: 0.5rem;
-
-    /* Status Tokens - Light */
+    /* Industrial status (text colour, text-on-surface colour, surface) */
     --status-healthy: #059669;
+    --status-healthy-text: #065f46;
     --status-healthy-bg: #ecfdf5;
-    --status-healthy-fg: #065f46;
-
     --status-alert: #e11d48;
+    --status-alert-text: #9f1239;
     --status-alert-bg: #fff1f2;
-    --status-alert-fg: #9f1239;
-
     --status-learning: #d97706;
+    --status-learning-text: #92400e;
     --status-learning-bg: #fffbeb;
-    --status-learning-fg: #92400e;
-
     --status-offline: #64748b;
+    --status-offline-text: #334155;
     --status-offline-bg: #f8fafc;
-    --status-offline-fg: #334155;
 
-    /* Charts */
-    --chart-1: 221.2 83.2% 53.3%;
-    --chart-2: 142.1 76.2% 36.3%;
-    --chart-3: 38 92% 50%;
-    --chart-4: 346.8 77.2% 49.8%;
-    --chart-5: 262.1 83.3% 57.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 6.5%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 6.5%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 217.2 91.2% 59.8%;
-
-    /* Status Tokens - Dark */
-    --status-healthy: #34d399;
-    --status-healthy-bg: #064e3b33;
-    --status-healthy-fg: #6ee7b7;
-
-    --status-alert: #fb7185;
-    --status-alert-bg: #88133733;
-    --status-alert-fg: #fda4af;
-
-    --status-learning: #fbbf24;
-    --status-learning-bg: #78350f33;
-    --status-learning-fg: #fcd34d;
-
-    --status-offline: #94a3b8;
-    --status-offline-bg: #1e293b66;
-    --status-offline-fg: #cbd5e1;
-
-    /* Charts Dark */
-    --chart-1: 217.2 91.2% 59.8%;
-    --chart-2: 142.1 70.6% 45.3%;
-    --chart-3: 38 92% 50%;
-    --chart-4: 346.8 77.2% 49.8%;
-    --chart-5: 262.1 83.3% 57.8%;
+    color-scheme: light;
   }
 }
 
+/* ------------------------------------------------------------------
+ * 2. Base
+ * ------------------------------------------------------------------ */
 @layer base {
-  * {
-    @apply border-border;
+  *,
+  *::before,
+  *::after {
+    border-color: hsl(var(--border));
+    box-sizing: border-box;
   }
-  body {
-    @apply bg-background text-foreground;
+
+  html {
+    font-family: var(--font-sans);
     font-feature-settings: "rlig" 1, "calt" 1;
-    min-height: 100vh;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+    line-height: 1.25;
+    margin: 0;
+  }
+
+  img, svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  .tabular,
+  [data-metric] {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * 3. Components
+ * ------------------------------------------------------------------ */
+@layer components {
+  .font-display {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .touch-target {
+    min-height: var(--touch-min);
+    min-width: var(--touch-min);
+  }
+
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -4rem;
+    z-index: 100;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius);
+    background: #ff5733;
+    color: #ffffff;
+    font-weight: 600;
+    transition: top 0.2s ease;
+  }
+  .skip-link:focus {
+    top: 1rem;
+  }
+
+  /* Status badge: always icon + text */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--badge-text, hsl(var(--foreground)));
+    background: var(--badge-bg, hsl(var(--secondary)));
+    white-space: nowrap;
+  }
+  .status-badge[data-status="healthy"] {
+    --badge-text: var(--status-healthy-text);
+    --badge-bg: var(--status-healthy-bg);
+  }
+  .status-badge[data-status="alert"] {
+    --badge-text: var(--status-alert-text);
+    --badge-bg: var(--status-alert-bg);
+  }
+  .status-badge[data-status="learning"] {
+    --badge-text: var(--status-learning-text);
+    --badge-bg: var(--status-learning-bg);
+  }
+  .status-badge[data-status="offline"] {
+    --badge-text: var(--status-offline-text);
+    --badge-bg: var(--status-offline-bg);
+  }
+
+  /* Live connection indicator */
+  .live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+  .live-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--status-offline);
+  }
+  .live-indicator[data-state="live"] .live-dot { background: var(--status-healthy); }
+  .live-indicator[data-state="reconnecting"] .live-dot { background: var(--status-learning); }
+  .live-indicator[data-state="offline"] .live-dot { background: var(--status-offline); }
+
+  /* Buttons */
+  .button-coral {
+    background-color: #ff5733;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    transition: all 0.15s ease;
+  }
+  .button-coral:hover:not(:disabled) {
+    background-color: #ff451d;
+  }
+  .button-coral:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Tables */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ------------------------------------------------------------------
+ * 4. Motion
+ * ------------------------------------------------------------------ */
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .live-indicator[data-state="live"] .live-dot {
+    animation: live-pulse 2s ease-in-out infinite;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
-    animation-delay: -1ms !important;
-    animation-duration: 1ms !important;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    background-attachment: initial !important;
+    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-    transition-duration: 0s !important;
-    transition-delay: 0s !important;
   }
+}
+
+/* ------------------------------------------------------------------
+ * 5. Print
+ * ------------------------------------------------------------------ */
+@media print {
+  .app-shell > .sidebar,
+  .app-header,
+  .decision-actions,
+  .skip-link {
+    display: none !important;
+  }
+  .app-shell { display: block; }
+  body { background: #fff; color: #000; }
+}
+
+/* ------------------------------------------------------------------
+ * 6. Hindi text
+ * ------------------------------------------------------------------ */
+:lang(hi) {
+  font-family: var(--font-devanagari), var(--font-sans);
+  line-height: 1.7;
 }

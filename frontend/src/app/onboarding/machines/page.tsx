@@ -3,12 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Cpu, Plus, AlertTriangle, CheckCircle2, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Cpu, Activity, User, Phone, Plus, CheckCircle2, AlertCircle, ArrowRight, ArrowLeft } from "lucide-react";
 import { apiClient, ApiError } from "@/lib/api-client";
 import type { Machine, PageMachine } from "@/types";
 
@@ -113,7 +108,6 @@ export default function MachinesOnboardingPage() {
   };
 
   const handleConfirmSkip = () => {
-    // Record in localStorage that machines were skipped
     if (typeof window !== "undefined") {
       sessionStorage.setItem("mc_onboarding_skipped_machines", "true");
     }
@@ -122,239 +116,291 @@ export default function MachinesOnboardingPage() {
 
   return (
     <div className="space-y-6">
-      <Card className="border-border shadow-sm">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Cpu className="h-4 w-4" />
-            </div>
-            <div>
-              <CardTitle className="text-xl">Step 3: Register Machinery</CardTitle>
-              <CardDescription>
-                Add your rotating equipment to monitor mechanical vibration and health
-              </CardDescription>
-            </div>
+      <div className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        {/* Header */}
+        <div className="flex items-center gap-3.5 pb-6 border-b border-slate-100">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-tr from-[#ff4724] to-[#ff7347] text-white shadow-sm shadow-[#ff5733]/20">
+            <Cpu className="h-5 w-5 stroke-[2.2]" />
           </div>
-        </CardHeader>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">
+              Step 3: Register Machinery
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Add rotating industrial assets to monitor vibration telemetry and predict anomalies
+            </p>
+          </div>
+        </div>
 
-        <CardContent>
+        <div className="pt-6">
           {errorMsg && (
             <div
               role="alert"
-              className="mb-4 flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+              className="mb-5 flex items-center gap-2.5 rounded-xl border border-rose-200 bg-rose-50/90 px-3.5 py-2.5 text-sm font-medium text-rose-700"
             >
-              <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-              <span>{errorMsg}</span>
+              <AlertCircle className="h-4 w-4 shrink-0 text-rose-500" aria-hidden="true" />
+              <p>{errorMsg}</p>
             </div>
           )}
 
           {initialLoading ? (
             <div className="space-y-4 py-6">
-              <div className="h-10 w-full animate-pulse rounded bg-muted" />
-              <div className="h-10 w-full animate-pulse rounded bg-muted" />
+              <div className="h-12 w-full animate-pulse rounded-xl bg-slate-100" />
+              <div className="h-12 w-full animate-pulse rounded-xl bg-slate-100" />
             </div>
           ) : (
-            <form onSubmit={handleAddMachine} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label htmlFor="machineName">Machine Name / Asset Tag</Label>
-                  <Input
+            <form onSubmit={handleAddMachine} className="space-y-5" noValidate>
+              {/* Asset Name */}
+              <div>
+                <label htmlFor="machineName" className="block text-sm font-semibold text-slate-800 mb-1.5">
+                  Machine Name / Asset Tag <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative flex items-center">
+                  <div className="absolute left-3.5 pointer-events-none text-slate-400">
+                    <Cpu className="h-4 w-4" aria-hidden="true" />
+                  </div>
+                  <input
                     id="machineName"
                     type="text"
                     required
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="CNC Main Spindle Motor #1"
-                    className="h-11 min-h-[44px]"
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (fieldErrors.name) {
+                        setFieldErrors((prev) => {
+                          const next = { ...prev };
+                          delete next.name;
+                          return next;
+                        });
+                      }
+                    }}
+                    placeholder="CNC Main Spindle Lathe 04"
+                    className="w-full h-12 min-h-[44px] rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-xs focus:border-[#ff5733] focus:ring-2 focus:ring-[#ff5733]/20 focus:outline-none transition-all"
                   />
-                  {fieldErrors.name && (
-                    <p className="text-xs text-destructive">{fieldErrors.name}</p>
-                  )}
                 </div>
+                {fieldErrors.name && (
+                  <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.name}</p>
+                )}
+              </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="machineType">Equipment Type</Label>
-                  <Select
+              {/* Equipment Type & Rated RPM */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="machineType" className="block text-sm font-semibold text-slate-800 mb-1.5">
+                    Equipment Category <span className="text-rose-500">*</span>
+                  </label>
+                  <select
                     id="machineType"
                     value={machineType}
                     onChange={(e) => setMachineType(e.target.value)}
-                    options={MACHINE_TYPES}
-                    className="h-11 min-h-[44px]"
-                  />
+                    className="w-full h-12 min-h-[44px] rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 shadow-xs focus:border-[#ff5733] focus:ring-2 focus:ring-[#ff5733]/20 focus:outline-none transition-all cursor-pointer"
+                  >
+                    {MACHINE_TYPES.map((t) => (
+                      <option key={t.value} value={t.value}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="ratedRpm">Rated RPM</Label>
-                  <Input
-                    id="ratedRpm"
-                    type="number"
-                    required
-                    min={60}
-                    max={60000}
-                    value={ratedRpm}
-                    onChange={(e) => setRatedRpm(e.target.value)}
-                    placeholder="1450"
-                    className="h-11 min-h-[44px]"
-                  />
+                <div>
+                  <label htmlFor="ratedRpm" className="block text-sm font-semibold text-slate-800 mb-1.5">
+                    Rated RPM <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative flex items-center">
+                    <div className="absolute left-3.5 pointer-events-none text-slate-400">
+                      <Activity className="h-4 w-4" aria-hidden="true" />
+                    </div>
+                    <input
+                      id="ratedRpm"
+                      type="number"
+                      required
+                      min={60}
+                      max={60000}
+                      value={ratedRpm}
+                      onChange={(e) => {
+                        setRatedRpm(e.target.value);
+                        if (fieldErrors.ratedRpm) {
+                          setFieldErrors((prev) => {
+                            const next = { ...prev };
+                            delete next.ratedRpm;
+                            return next;
+                          });
+                        }
+                      }}
+                      placeholder="1450"
+                      className="w-full h-12 min-h-[44px] rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-xs focus:border-[#ff5733] focus:ring-2 focus:ring-[#ff5733]/20 focus:outline-none transition-all"
+                    />
+                  </div>
                   {fieldErrors.ratedRpm && (
-                    <p className="text-xs text-destructive">{fieldErrors.ratedRpm}</p>
-                  )}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="supName">Shop Floor Supervisor Name</Label>
-                  <Input
-                    id="supName"
-                    type="text"
-                    value={supervisorName}
-                    onChange={(e) => setSupervisorName(e.target.value)}
-                    placeholder="Suresh Kumar"
-                    className="h-11 min-h-[44px]"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="supPhone">Supervisor Phone (Voice Alerts)</Label>
-                  <Input
-                    id="supPhone"
-                    type="tel"
-                    value={supervisorPhone}
-                    onChange={(e) => setSupervisorPhone(e.target.value)}
-                    placeholder="+919876543211"
-                    className="h-11 min-h-[44px]"
-                  />
-                  {fieldErrors.supervisorPhone && (
-                    <p className="text-xs text-destructive">{fieldErrors.supervisorPhone}</p>
+                    <p className="mt-1 text-xs font-medium text-rose-600">{fieldErrors.ratedRpm}</p>
                   )}
                 </div>
               </div>
 
-              <div className="flex justify-end pt-2">
-                <Button
+              {/* Supervisor Details */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="supervisorName" className="block text-sm font-semibold text-slate-800 mb-1.5">
+                    Shift Supervisor Name
+                  </label>
+                  <div className="relative flex items-center">
+                    <div className="absolute left-3.5 pointer-events-none text-slate-400">
+                      <User className="h-4 w-4" aria-hidden="true" />
+                    </div>
+                    <input
+                      id="supervisorName"
+                      type="text"
+                      value={supervisorName}
+                      onChange={(e) => setSupervisorName(e.target.value)}
+                      placeholder="R. Verma"
+                      className="w-full h-12 min-h-[44px] rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-xs focus:border-[#ff5733] focus:ring-2 focus:ring-[#ff5733]/20 focus:outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="supervisorPhone" className="block text-sm font-semibold text-slate-800 mb-1.5">
+                    Supervisor Phone (for AI Calls)
+                  </label>
+                  <div className="relative flex items-center">
+                    <div className="absolute left-3.5 pointer-events-none text-slate-400">
+                      <Phone className="h-4 w-4" aria-hidden="true" />
+                    </div>
+                    <input
+                      id="supervisorPhone"
+                      type="tel"
+                      value={supervisorPhone}
+                      onChange={(e) => {
+                        setSupervisorPhone(e.target.value);
+                        if (fieldErrors.supervisorPhone) {
+                          setFieldErrors((prev) => {
+                            const next = { ...prev };
+                            delete next.supervisorPhone;
+                            return next;
+                          });
+                        }
+                      }}
+                      placeholder="+919876543210"
+                      className="w-full h-12 min-h-[44px] rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-xs focus:border-[#ff5733] focus:ring-2 focus:ring-[#ff5733]/20 focus:outline-none transition-all"
+                    />
+                  </div>
+                  {fieldErrors.supervisorPhone && (
+                    <p className="mt-1 text-xs font-medium text-rose-600">
+                      {fieldErrors.supervisorPhone}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Add Machine Button */}
+              <div className="pt-2 flex justify-end">
+                <button
                   type="submit"
                   disabled={loading}
-                  variant="secondary"
-                  className="min-h-[44px] px-5"
+                  className="h-11 px-5 flex items-center gap-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-sm shadow-xs transition-colors cursor-pointer disabled:opacity-60"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
-                  {loading ? "Adding Asset..." : "Add Machine to Fleet"}
-                </Button>
+                  <Plus className="h-4 w-4 text-[#ff5733]" />
+                  <span>{loading ? "Adding Asset…" : "Add Machine to Fleet"}</span>
+                </button>
               </div>
             </form>
           )}
 
-          {/* List of registered machines */}
-          <div className="mt-8 border-t border-border pt-6">
-            <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center justify-between">
-              <span>Registered Machines ({machines.length})</span>
-              {machines.length > 0 && (
-                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-normal flex items-center gap-1">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  Ready to link sensor node
-                </span>
-              )}
-            </h3>
-
-            {machines.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground bg-muted/20">
-                No machines added yet. Fill the form above to add your first machine, or choose
-                &quot;Add later&quot; to skip.
-              </div>
-            ) : (
+          {/* Registered Machines List */}
+          {machines.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-slate-100">
+              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">
+                Registered Equipment ({machines.length})
+              </h2>
               <div className="space-y-2.5">
                 {machines.map((m) => (
                   <div
                     key={m.id}
-                    className="flex items-center justify-between rounded-lg border border-border bg-card p-3 shadow-xs"
+                    className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/60"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary font-bold text-xs uppercase">
-                        {m.machine_type.slice(0, 3)}
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                        <CheckCircle2 className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="font-medium text-sm text-foreground">{m.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {m.machine_type.toUpperCase()} &bull; {m.rated_rpm || 1450} RPM
-                          {m.supervisor_name && ` &bull; Sup: ${m.supervisor_name}`}
+                        <p className="font-semibold text-sm text-slate-900">{m.name}</p>
+                        <p className="text-xs text-slate-500">
+                          {m.machine_type.toUpperCase()} &middot; {m.rated_rpm} RPM
+                          {m.supervisor_name ? ` &middot; Sup: ${m.supervisor_name}` : ""}
                         </p>
                       </div>
                     </div>
-                    <span className="text-xs text-muted-foreground px-2 py-0.5 rounded bg-muted">
-                      ID: {m.id.slice(0, 10)}...
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-200/70 text-slate-700">
+                      Sensor unbound
                     </span>
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-
-          {/* Skip warning modal / alert */}
-          {showSkipConfirm && (
-            <div className="mt-6 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-amber-900 dark:text-amber-200">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                <div className="space-y-2 text-sm">
-                  <p className="font-semibold">Skip adding machines for now?</p>
-                  <p className="text-xs text-muted-foreground">
-                    Your dashboard will open in an empty state with no live telemetry until you
-                    register a machine and bind an ESP32 accelerometer sensor.
-                  </p>
-                  <div className="flex gap-2 pt-1">
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={handleConfirmSkip}
-                      className="min-h-[44px]"
-                    >
-                      Yes, skip to review
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setShowSkipConfirm(false)}
-                      className="min-h-[44px]"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 
-          {/* Action buttons */}
-          <div className="pt-8 border-t border-border mt-6 flex items-center justify-between">
-            <Link href="/onboarding/factory">
-              <Button type="button" variant="outline" className="min-h-[44px] px-4">
-                ← Back
-              </Button>
+          {/* Navigation Controls */}
+          <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
+            <Link
+              href="/onboarding/factory"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors min-h-[44px]"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back</span>
             </Link>
 
             <div className="flex items-center gap-3">
-              {machines.length === 0 && !showSkipConfirm && (
-                <Button
+              {machines.length === 0 ? (
+                <button
                   type="button"
-                  variant="ghost"
                   onClick={() => setShowSkipConfirm(true)}
-                  className="min-h-[44px] text-muted-foreground hover:text-foreground"
+                  className="px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors min-h-[44px] cursor-pointer"
                 >
-                  Add later
-                </Button>
-              )}
+                  Skip for now
+                </button>
+              ) : null}
 
-              <Button
+              <button
                 type="button"
                 onClick={handleContinue}
-                disabled={machines.length === 0}
-                className="min-h-[44px] px-6 text-base font-medium"
+                className="h-12 min-h-[44px] px-6 flex items-center justify-center gap-2 rounded-xl bg-[#ff5733] hover:bg-[#ff451d] text-white font-semibold text-sm shadow-md shadow-[#ff5733]/25 active:scale-[0.99] transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#ff5733] focus:ring-offset-2"
               >
-                Continue to Review →
-              </Button>
+                <span>Continue to Review</span>
+                <ArrowRight className="h-4 w-4 stroke-[2.2]" aria-hidden="true" />
+              </button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
+      {/* Skip Confirmation Dialog */}
+      {showSkipConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-200">
+            <h3 className="text-lg font-bold text-slate-900">Skip machine setup?</h3>
+            <p className="mt-2 text-sm text-slate-500">
+              You can still finish onboarding and add machines later from the Fleet dashboard, but vibration monitoring requires at least one registered machine.
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowSkipConfirm(false)}
+                className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl min-h-[44px] cursor-pointer"
+              >
+                Go back
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmSkip}
+                className="px-5 py-2 text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-xl min-h-[44px] cursor-pointer"
+              >
+                Yes, skip for now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-

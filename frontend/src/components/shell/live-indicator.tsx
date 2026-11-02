@@ -16,21 +16,24 @@ export function LiveIndicator() {
   const config = {
     connected: {
       label: "Live",
+      state: "live",
       dotClass: "bg-emerald-500 animate-pulse",
-      textClass: "text-emerald-700 dark:text-emerald-400",
-      bgClass: "bg-emerald-500/10 border-emerald-500/20",
+      textClass: "text-emerald-700",
+      bgClass: "bg-emerald-50 border-emerald-200",
     },
     connecting: {
       label: "Reconnecting",
+      state: "reconnecting",
       dotClass: "bg-amber-500 animate-ping",
-      textClass: "text-amber-700 dark:text-amber-400",
-      bgClass: "bg-amber-500/10 border-amber-500/20",
+      textClass: "text-amber-700",
+      bgClass: "bg-amber-50 border-amber-200",
     },
     disconnected: {
       label: "Offline",
+      state: "offline",
       dotClass: "bg-slate-400",
-      textClass: "text-slate-600 dark:text-slate-400",
-      bgClass: "bg-slate-500/10 border-slate-500/20",
+      textClass: "text-slate-600",
+      bgClass: "bg-slate-100 border-slate-200",
     },
   }[status];
 
@@ -38,12 +41,14 @@ export function LiveIndicator() {
     <div
       role="status"
       aria-live="polite"
+      data-state={config.state}
+      data-testid="live-indicator"
       className={cn(
-        "inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors",
+        "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
         config.bgClass
       )}
     >
-      <span className={cn("h-2 w-2 rounded-full", config.dotClass)} />
+      <span className={cn("h-2 w-2 rounded-full", config.dotClass)} aria-hidden="true" />
       <span className={config.textClass}>{config.label}</span>
     </div>
   );

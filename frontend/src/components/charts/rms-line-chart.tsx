@@ -10,9 +10,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceDot,
+  ReferenceLine,
 } from "recharts";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Select } from "@/components/ui/select";
 import { Activity } from "lucide-react";
 import type { Machine, TrendPoint } from "@/types";
 
@@ -55,63 +54,71 @@ export function RmsLineChart({
   const selectedMachine = machines.find((m) => m.id === selectedMachineId);
 
   return (
-    <Card className={className}>
-      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-2">
-        <div className="space-y-1">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Activity className="h-4 w-4 text-primary" />
-            24-Hour Vibration RMS Trend
-          </CardTitle>
-          <p className="text-xs text-muted-foreground">
+    <section
+      aria-labelledby="rms-title"
+      className={`rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs ${className || ""}`}
+    >
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100">
+        <div>
+          <h2 id="rms-title" className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <Activity className="h-4 w-4 text-[#ff5733]" />
+            Vibration RMS, live
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
             {selectedMachine
-              ? `Monitoring ${selectedMachine.name} (rated ${selectedMachine.rated_rpm || 1500} RPM)`
-              : "Select a machine to inspect continuous vibration measurements"}
+              ? `Real-time RMS vibration for ${selectedMachine.name}`
+              : "Continuous vibration telemetry measurements"}
           </p>
         </div>
 
         {/* Machine Picker */}
         {machines.length > 0 && (
-          <div className="w-full sm:w-[200px]">
-            <Select
+          <div className="w-full sm:w-[220px]">
+            <label htmlFor="rms-machine" className="sr-only">
+              Machine
+            </label>
+            <select
+              id="rms-machine"
+              name="machine"
               value={selectedMachineId}
               onChange={(e) => onSelectMachine(e.target.value)}
-              aria-label="Select machine for vibration trend"
-              className="h-9 min-h-[36px] text-xs"
+              aria-label="Select machine for live vibration trend"
+              className="w-full h-10 min-h-[44px] rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-800 shadow-xs focus:border-[#ff5733] focus:ring-2 focus:ring-[#ff5733]/20 focus:outline-none cursor-pointer"
             >
               {machines.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.name}
                 </option>
               ))}
-            </Select>
+            </select>
           </div>
         )}
-      </CardHeader>
-      <CardContent>
-        {/* Screen reader text summary per prompt requirement */}
-        <div className="sr-only">
-          Line chart showing root-mean-square vibration acceleration in g over the last 24 hours for machine{" "}
-          {selectedMachine?.name}. {alertPoints.length} alert threshold spikes recorded.
-        </div>
-        <div className="h-[240px] w-full pt-3">
+      </header>
+
+      <figure className="chart mt-4" data-chart="rms-line">
+        <div
+          className="h-[240px] w-full"
+          role="img"
+          aria-label={`Line chart of vibration RMS for ${selectedMachine?.name || "selected machine"} over the last 24 hours`}
+        >
           {chartPoints.length === 0 ? (
-            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              No trend data available for this machine in the last 24 hours.
+            <div className="flex h-full items-center justify-center text-xs font-medium text-slate-400">
+              No live telemetry data recorded yet for this machine.
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartPoints} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                 <XAxis
                   dataKey="time"
-                  stroke="currentColor"
-                  className="text-xs text-muted-foreground"
+                  stroke="#94a3b8"
+                  fontSize={11}
                   tickLine={false}
                   axisLine={false}
                 />
                 <YAxis
-                  stroke="currentColor"
-                  className="text-xs text-muted-foreground"
+                  stroke="#94a3b8"
+                  fontSize={11}
                   tickLine={false}
                   axisLine={false}
                   domain={[0, "auto"]}
@@ -123,14 +130,14 @@ export function RmsLineChart({
                       const val = payload[0]?.value;
                       const isAlert = payload[0]?.payload?.isAlert;
                       return (
-                        <div className="rounded-lg border border-border bg-popover p-2.5 shadow-md">
-                          <p className="text-xs text-muted-foreground">{label} IST</p>
-                          <p className="text-sm font-bold text-foreground">
+                        <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-lg">
+                          <p className="text-xs text-slate-400 font-medium">{label} IST</p>
+                          <p className="text-sm font-bold text-slate-900 mt-0.5">
                             RMS: {val} g
                           </p>
                           {isAlert && (
-                            <p className="mt-1 text-xs font-semibold text-rose-500">
-                              * Anomaly Alert Point
+                            <p className="mt-1 text-xs font-semibold text-rose-600">
+                              * Anomaly Detected
                             </p>
                           )}
                         </div>
@@ -139,13 +146,25 @@ export function RmsLineChart({
                     return null;
                   }}
                 />
+                <ReferenceLine
+                  y={0.8}
+                  stroke="#f59e0b"
+                  strokeDasharray="4 4"
+                  label={{ value: "Warning (0.8g)", fill: "#d97706", fontSize: 10, position: "top" }}
+                />
+                <ReferenceLine
+                  y={1.4}
+                  stroke="#e11d48"
+                  strokeDasharray="4 4"
+                  label={{ value: "Critical (1.4g)", fill: "#be123c", fontSize: 10, position: "top" }}
+                />
                 <Line
                   type="monotone"
                   dataKey="rms_g"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
+                  stroke="#ff5733"
+                  strokeWidth={2.5}
                   dot={false}
-                  activeDot={{ r: 4 }}
+                  activeDot={{ r: 5, fill: "#ff5733" }}
                 />
                 {alertPoints.map((pt, i) => (
                   <ReferenceDot
@@ -153,8 +172,8 @@ export function RmsLineChart({
                     x={pt.time}
                     y={pt.rms_g}
                     r={5}
-                    fill="var(--status-alert)"
-                    stroke="var(--card)"
+                    fill="#e11d48"
+                    stroke="#ffffff"
                     strokeWidth={2}
                   />
                 ))}
@@ -162,8 +181,46 @@ export function RmsLineChart({
             </ResponsiveContainer>
           )}
         </div>
-      </CardContent>
-    </Card>
+        <figcaption className="mt-2 text-xs text-slate-400">
+          Threshold lines show warning and critical levels.
+        </figcaption>
+      </figure>
+
+      {/* Accessible Table Alternative */}
+      {chartPoints.length > 0 && (
+        <details className="mt-3 text-xs text-slate-500 cursor-pointer">
+          <summary className="font-semibold text-slate-600 hover:text-slate-900 select-none py-1">
+            View data as table
+          </summary>
+          <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-slate-200">
+            <table className="w-full text-left text-xs">
+              <caption className="sr-only">Vibration RMS data points</caption>
+              <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold sticky top-0">
+                <tr>
+                  <th scope="col" className="p-2">Time</th>
+                  <th scope="col" className="p-2">RMS (g)</th>
+                  <th scope="col" className="p-2">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {chartPoints.slice(-15).map((row, idx) => (
+                  <tr key={idx} className="hover:bg-slate-50">
+                    <td className="p-2 font-mono">{row.time}</td>
+                    <td className="p-2 font-bold" data-metric>{row.rms_g}</td>
+                    <td className="p-2">
+                      {row.isAlert ? (
+                        <span className="text-rose-600 font-semibold">Anomaly</span>
+                      ) : (
+                        <span className="text-emerald-600 font-medium">Nominal</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      )}
+    </section>
   );
 }
-

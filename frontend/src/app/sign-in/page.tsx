@@ -3,10 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Radio, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { AlertCircle, Eye, EyeOff, Mail, Lock, ArrowRight, Radio } from "lucide-react";
 import { apiClient, ApiError } from "@/lib/api-client";
 import { setStoredToken, setStoredUser } from "@/lib/auth";
 import type { TokenOut, User } from "@/types";
@@ -15,17 +12,40 @@ export default function SignInPage() {
   const router = useRouter();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [rememberMe, setRememberMe] = React.useState(true);
   const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [loading, setLoading] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+    setFieldErrors({});
+
+    const errors: Record<string, string> = {};
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      errors.email = "Email is required.";
+    } else if (!trimmedEmail.includes("@")) {
+      errors.email = "Please enter a valid email address.";
+    }
+
+    if (!password) {
+      errors.password = "Password is required.";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+
     setLoading(true);
 
     try {
       const data = await apiClient.post<TokenOut>("/v1/auth/login", {
-        email,
+        email: trimmedEmail.toLowerCase(),
         password,
       });
 
@@ -59,21 +79,21 @@ export default function SignInPage() {
           return;
         }
       } catch {
-        // If /v1/me fails, default to dashboard
+        // If /v1/me fails, continue to dashboard
       }
 
       router.push("/dashboard");
     } catch (err) {
       if (err instanceof ApiError) {
-        if (err.code === "RATE_LIMITED") {
-          setErrorMsg("Too many failed attempts. Account temporarily locked for 15 minutes.");
-        } else if (err.code === "UNAUTHENTICATED") {
-          setErrorMsg("Invalid email or password.");
+        if (err.code === "RATE_LIMITED" || err.status === 429) {
+          setErrorMsg("Too many attempts. Try again later.");
+        } else if (err.code === "UNAUTHENTICATED" || err.status === 401) {
+          setErrorMsg("Email or password is incorrect.");
         } else {
-          setErrorMsg(err.message || "Sign in failed. Please try again.");
+          setErrorMsg(err.message || "Email or password is incorrect.");
         }
       } else {
-        setErrorMsg("Network error. Please verify your connection.");
+        setErrorMsg("Email or password is incorrect.");
       }
     } finally {
       setLoading(false);
@@ -81,79 +101,201 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 rounded-2xl border border-border bg-card p-8 shadow-sm">
-        <div className="flex flex-col items-center text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-            <Radio className="h-6 w-6 animate-pulse" />
+    <div className="min-h-screen flex flex-col justify-center items-center bg-[#f7f7f8] px-4 py-12">
+      <a className="skip-link" href="#sign-in-form">
+        Skip to sign in
+      </a>
+
+      <main className="w-full max-w-[420px]">
+        {/* Top Centered Glowing Badge */}
+        <div className="flex justify-center mb-5">
+          <div className="relative flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-tr from-[#ff4724] to-[#ff7347] shadow-lg shadow-[#ff5733]/30 ring-4 ring-[#ff5733]/15">
+            <Radio className="w-7 h-7 text-white stroke-[2.2] animate-pulse" />
           </div>
-          <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
-            Sign in to Machine Copilot
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Enter your factory owner credentials to monitor your shop floor
+        </div>
+
+        {/* Heading & Subtitle */}
+        <div className="text-center mb-7">
+          <h1
+            id="sign-in-title"
+            aria-label="Sign in"
+            className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900"
+          >
+            Welcome back
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Sign in to access to your dashboard, settings and projects.
           </p>
         </div>
 
+        {/* Error Alert */}
         {errorMsg && (
           <div
+            id="sign-in-error"
+            className="mb-5 flex items-center gap-2.5 rounded-xl border border-rose-200 bg-rose-50/90 px-3.5 py-2.5 text-sm font-medium text-rose-700"
             role="alert"
-            className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+            data-testid="sign-in-error"
           >
-            <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-            <span>{errorMsg}</span>
+            <AlertCircle className="h-4 w-4 shrink-0 text-rose-500" aria-hidden="true" />
+            <p>{errorMsg}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="email">Email address</Label>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="owner@example.com"
-              className="h-11 min-h-[44px]"
-            />
+        {/* Form Container */}
+        <form
+          id="sign-in-form"
+          className="space-y-4"
+          noValidate
+          data-testid="sign-in-form"
+          onSubmit={handleSubmit}
+        >
+          {/* Email Field */}
+          <div>
+            <label
+              htmlFor="si-email"
+              className="block text-sm font-semibold text-slate-800 mb-1.5"
+            >
+              Email
+            </label>
+            <div className="relative flex items-center">
+              <div className="absolute left-3.5 pointer-events-none text-slate-400">
+                <Mail className="h-4 w-4" aria-hidden="true" />
+              </div>
+              <input
+                id="si-email"
+                name="email"
+                type="email"
+                autoComplete="username"
+                inputMode="email"
+                spellCheck={false}
+                required
+                aria-describedby={fieldErrors.email ? "si-email-error" : undefined}
+                aria-invalid={!!fieldErrors.email}
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (fieldErrors.email) {
+                    setFieldErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.email;
+                      return next;
+                    });
+                  }
+                }}
+                placeholder="info@pixsellz.io"
+                className="w-full h-12 min-h-[44px] rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-[#ff5733] focus:ring-2 focus:ring-[#ff5733]/20 focus:outline-none transition-all"
+              />
+            </div>
+            {fieldErrors.email && (
+              <p id="si-email-error" className="mt-1 text-xs font-medium text-rose-600">
+                {fieldErrors.email}
+              </p>
+            )}
           </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••"
-              className="h-11 min-h-[44px]"
-            />
+          {/* Password Field with Forgot Password */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label
+                htmlFor="si-password"
+                className="text-sm font-semibold text-slate-800"
+              >
+                Password
+              </label>
+              <button
+                type="button"
+                className="text-xs font-medium text-slate-400 hover:text-[#ff5733] transition-colors focus:outline-none focus:underline"
+              >
+                Forgot Password?
+              </button>
+            </div>
+            <div className="relative flex items-center">
+              <div className="absolute left-3.5 pointer-events-none text-slate-400">
+                <Lock className="h-4 w-4" aria-hidden="true" />
+              </div>
+              <input
+                id="si-password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                required
+                aria-describedby={fieldErrors.password ? "si-password-error" : undefined}
+                aria-invalid={!!fieldErrors.password}
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (fieldErrors.password) {
+                    setFieldErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.password;
+                      return next;
+                    });
+                  }
+                }}
+                placeholder="Enter your password"
+                className="w-full h-12 min-h-[44px] rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-[#ff5733] focus:ring-2 focus:ring-[#ff5733]/20 focus:outline-none transition-all"
+              />
+              <button
+                type="button"
+                className="absolute right-2.5 h-9 w-9 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff5733]"
+                aria-pressed={showPassword}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={() => setShowPassword((prev) => !prev)}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <Eye className="h-4 w-4" aria-hidden="true" />
+                )}
+              </button>
+            </div>
+            {fieldErrors.password && (
+              <p id="si-password-error" className="mt-1 text-xs font-medium text-rose-600">
+                {fieldErrors.password}
+              </p>
+            )}
           </div>
 
-          <Button
+          {/* Remember for 30 days */}
+          <div className="flex items-center gap-2 pt-1">
+            <input
+              id="remember"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 rounded border-slate-300 text-[#ff5733] focus:ring-[#ff5733]/30 cursor-pointer accent-[#ff5733]"
+            />
+            <label
+              htmlFor="remember"
+              className="text-xs sm:text-sm text-slate-600 cursor-pointer select-none"
+            >
+              Remember for 30 days
+            </label>
+          </div>
+
+          {/* Primary Coral Action Button */}
+          <button
             type="submit"
             disabled={loading}
-            className="w-full h-11 min-h-[44px] text-base font-medium"
+            className="w-full h-12 min-h-[44px] mt-2 flex items-center justify-center gap-2 rounded-xl bg-[#ff5733] hover:bg-[#ff451d] text-white font-semibold text-sm shadow-md shadow-[#ff5733]/25 active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#ff5733] focus:ring-offset-2"
+            data-testid="sign-in-submit"
           >
-            {loading ? "Signing in..." : "Sign in"}
-          </Button>
+            <span>{loading ? "Signing in…" : "Sign in"}</span>
+            {!loading && <ArrowRight className="h-4 w-4 stroke-[2.2]" aria-hidden="true" />}
+          </button>
         </form>
 
-        <div className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account yet?{" "}
+        {/* Bottom Switch Link */}
+        <p className="mt-8 text-center text-sm text-slate-500">
+          No account?{" "}
           <Link
             href="/sign-up"
-            className="font-semibold text-primary hover:underline min-h-[44px] inline-flex items-center"
+            className="font-medium text-[#ff5733] hover:underline underline-offset-4"
           >
             Create an account
           </Link>
-        </div>
-      </div>
+        </p>
+      </main>
     </div>
   );
 }
-

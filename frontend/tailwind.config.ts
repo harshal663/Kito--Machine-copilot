@@ -1,7 +1,6 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  darkMode: ["class"],
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -21,8 +20,8 @@ const config: Config = {
           foreground: "hsl(var(--popover-foreground))",
         },
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "#ff5733",
+          foreground: "#ffffff",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -33,8 +32,8 @@ const config: Config = {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "#ff5733",
+          foreground: "#ffffff",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -42,20 +41,20 @@ const config: Config = {
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
+        ring: "#ff5733",
         status: {
           healthy: "var(--status-healthy)",
+          "healthy-text": "var(--status-healthy-text)",
           "healthy-bg": "var(--status-healthy-bg)",
-          "healthy-fg": "var(--status-healthy-fg)",
           alert: "var(--status-alert)",
+          "alert-text": "var(--status-alert-text)",
           "alert-bg": "var(--status-alert-bg)",
-          "alert-fg": "var(--status-alert-fg)",
           learning: "var(--status-learning)",
+          "learning-text": "var(--status-learning-text)",
           "learning-bg": "var(--status-learning-bg)",
-          "learning-fg": "var(--status-learning-fg)",
           offline: "var(--status-offline)",
+          "offline-text": "var(--status-offline-text)",
           "offline-bg": "var(--status-offline-bg)",
-          "offline-fg": "var(--status-offline-fg)",
         },
         chart: {
           1: "hsl(var(--chart-1))",
@@ -65,16 +64,23 @@ const config: Config = {
           5: "hsl(var(--chart-5))",
         },
       },
+      fontFamily: {
+        sans: ["var(--font-inter)", "var(--font-devanagari)", "system-ui", "-apple-system", "sans-serif"],
+        serif: ["var(--font-playfair)", "Georgia", "Times New Roman", "serif"],
+        display: ["var(--font-playfair)", "Georgia", "Times New Roman", "serif"],
+      },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        DEFAULT: "0.75rem",
+        sm: "0.5rem",
+        md: "0.75rem",
+        lg: "1rem",
+        xl: "1.25rem",
       },
       minHeight: {
-        touch: "44px",
+        touch: "var(--touch-min, 44px)",
       },
       minWidth: {
-        touch: "44px",
+        touch: "var(--touch-min, 44px)",
       },
     },
   },

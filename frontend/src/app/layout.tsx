@@ -17,9 +17,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className="h-full">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className="h-full"
+    >
       <body className="min-h-full bg-background text-foreground antialiased font-sans">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          forcedTheme="light"
+          enableSystem={false}
+        >
           <Providers>
             {children}
             <Toaster position="top-right" richColors />

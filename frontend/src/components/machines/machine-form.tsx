@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Cpu, Phone, ArrowRight } from "lucide-react";
 import { machineCreateSchema, type MachineCreateFormData } from "@/lib/schemas";
 import { apiClient } from "@/lib/api-client";
 import { Input } from "@/components/ui/input";
@@ -56,133 +57,166 @@ export function MachineForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-xl bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-6 rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-sm"
+    >
       {serverError && (
-        <Alert variant="danger">
+        <Alert variant="danger" className="rounded-xl">
           <AlertTitle>Registration Error</AlertTitle>
           <AlertDescription>{serverError}</AlertDescription>
         </Alert>
       )}
 
+      {/* Asset Specifications */}
       <div className="space-y-4">
+        <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-50 text-[#ff5733]">
+            <Cpu className="h-4 w-4" />
+          </div>
+          <h3 className="text-sm font-bold text-slate-900">Machine Specifications</h3>
+        </div>
+
         <div>
-          <Label htmlFor="name">Machine Name *</Label>
+          <Label htmlFor="name" className="text-xs font-semibold text-slate-700">
+            Machine Name *
+          </Label>
           <Input
             id="name"
             placeholder="e.g. Primary Slurry Pump #3"
             {...register("name")}
-            className="mt-1"
+            className="mt-1.5 h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15"
           />
-          {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name.message}</p>}
+          {errors.name && <p className="text-xs text-rose-600 mt-1">{errors.name.message}</p>}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="machine_type">Machine Type *</Label>
+            <Label htmlFor="machine_type" className="text-xs font-semibold text-slate-700">
+              Machine Category *
+            </Label>
             <Input
               id="machine_type"
               placeholder="e.g. Slurry Pump"
               {...register("machine_type")}
-              className="mt-1"
+              className="mt-1.5 h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15"
             />
             {errors.machine_type && (
-              <p className="text-xs text-red-600 mt-1">{errors.machine_type.message}</p>
+              <p className="text-xs text-rose-600 mt-1">{errors.machine_type.message}</p>
             )}
           </div>
 
           <div>
-            <Label htmlFor="model">Model / Spec</Label>
+            <Label htmlFor="model" className="text-xs font-semibold text-slate-700">
+              Model / Specification
+            </Label>
             <Input
               id="model"
               placeholder="e.g. Warman 10/8 AH"
               {...register("model")}
-              className="mt-1"
+              className="mt-1.5 h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15"
             />
             {errors.model && (
-              <p className="text-xs text-red-600 mt-1">{errors.model.message}</p>
+              <p className="text-xs text-rose-600 mt-1">{errors.model.message}</p>
             )}
           </div>
         </div>
 
         <div>
-          <Label htmlFor="rated_rpm">Rated Operating RPM</Label>
+          <Label htmlFor="rated_rpm" className="text-xs font-semibold text-slate-700">
+            Rated Operating RPM
+          </Label>
           <Input
             id="rated_rpm"
             type="number"
             placeholder="e.g. 1465"
             {...register("rated_rpm")}
-            className="mt-1"
+            className="mt-1.5 h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15 tabular-nums"
           />
           {errors.rated_rpm && (
-            <p className="text-xs text-red-600 mt-1">{errors.rated_rpm.message}</p>
+            <p className="text-xs text-rose-600 mt-1">{errors.rated_rpm.message}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Emergency Escalation Contacts */}
+      <div className="space-y-4 pt-4 border-t border-slate-200/80">
+        <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-50 text-[#ff5733]">
+            <Phone className="h-4 w-4" />
+          </div>
+          <h3 className="text-sm font-bold text-slate-900">Emergency Dispatch & Voice Escalation</h3>
+        </div>
+
+        <div>
+          <Label htmlFor="supervisor_name" className="text-xs font-semibold text-slate-700">
+            Supervisor Name
+          </Label>
+          <Input
+            id="supervisor_name"
+            placeholder="e.g. Ramesh Kumar"
+            {...register("supervisor_name")}
+            className="mt-1.5 h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15"
+          />
+          {errors.supervisor_name && (
+            <p className="text-xs text-rose-600 mt-1">{errors.supervisor_name.message}</p>
           )}
         </div>
 
-        <div className="pt-2 border-t border-slate-200">
-          <h4 className="text-sm font-semibold text-slate-800 mb-3">
-            Emergency Voice & Escalation Contacts
-          </h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="supervisor_phone" className="text-xs font-semibold text-slate-700">
+              Supervisor Phone (Voice Dispatch) *
+            </Label>
+            <Input
+              id="supervisor_phone"
+              placeholder="+919876543210"
+              {...register("supervisor_phone")}
+              className="mt-1.5 h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15 font-mono"
+            />
+            {errors.supervisor_phone && (
+              <p className="text-xs text-rose-600 mt-1">
+                {errors.supervisor_phone.message}
+              </p>
+            )}
+          </div>
 
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="supervisor_name">Supervisor / Lead Name</Label>
-              <Input
-                id="supervisor_name"
-                placeholder="e.g. Ramesh Kumar"
-                {...register("supervisor_name")}
-                className="mt-1"
-              />
-              {errors.supervisor_name && (
-                <p className="text-xs text-red-600 mt-1">{errors.supervisor_name.message}</p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="supervisor_phone">Supervisor Phone (AI Voice Call) *</Label>
-                <Input
-                  id="supervisor_phone"
-                  placeholder="+919876543210"
-                  {...register("supervisor_phone")}
-                  className="mt-1 font-mono text-xs"
-                />
-                {errors.supervisor_phone && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {errors.supervisor_phone.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="backup_phone">Backup Phone (Escalation SMS)</Label>
-                <Input
-                  id="backup_phone"
-                  placeholder="+919123456789"
-                  {...register("backup_phone")}
-                  className="mt-1 font-mono text-xs"
-                />
-                {errors.backup_phone && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {errors.backup_phone.message}
-                  </p>
-                )}
-              </div>
-            </div>
+          <div>
+            <Label htmlFor="backup_phone" className="text-xs font-semibold text-slate-700">
+              Backup Phone (SMS / Escalation)
+            </Label>
+            <Input
+              id="backup_phone"
+              placeholder="+919123456789"
+              {...register("backup_phone")}
+              className="mt-1.5 h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15 font-mono"
+            />
+            {errors.backup_phone && (
+              <p className="text-xs text-rose-600 mt-1">
+                {errors.backup_phone.message}
+              </p>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+      {/* Form Submission Actions */}
+      <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200/80">
         <Button
           type="button"
           variant="outline"
           onClick={() => router.push("/machines")}
-          className="min-h-[44px]"
+          className="text-xs font-semibold border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
         >
           Cancel
         </Button>
-        <Button type="submit" isLoading={isSubmitting} className="min-h-[44px]">
-          Register Machine
+        <Button
+          type="submit"
+          isLoading={isSubmitting}
+          className="text-xs font-semibold bg-[#ff5733] hover:bg-[#e04522] text-white shadow-sm gap-2"
+        >
+          Register Asset
+          <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
     </form>

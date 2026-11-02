@@ -8,6 +8,7 @@ interface StatCardProps {
   icon: React.ReactNode;
   statusVariant?: "default" | "healthy" | "alert" | "learning" | "offline";
   className?: string;
+  testId?: string;
 }
 
 export function StatCard({
@@ -17,48 +18,50 @@ export function StatCard({
   icon,
   statusVariant = "default",
   className,
+  testId,
 }: StatCardProps) {
   const variantStyles = {
-    default: "border-border bg-card text-foreground",
-    healthy: "border-status-healthy/30 bg-card text-foreground",
-    alert: "border-status-alert/40 bg-card text-foreground",
-    learning: "border-status-learning/30 bg-card text-foreground",
-    offline: "border-status-offline/30 bg-card text-foreground",
+    default: "border-slate-200/90 bg-white text-slate-900",
+    healthy: "border-emerald-200/80 bg-white text-slate-900",
+    alert: "border-rose-200/80 bg-white text-slate-900",
+    learning: "border-amber-200/80 bg-white text-slate-900",
+    offline: "border-slate-200/80 bg-white text-slate-900",
   }[statusVariant];
 
   const iconStyles = {
-    default: "bg-muted text-muted-foreground",
-    healthy: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-    alert: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
-    learning: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-    offline: "bg-slate-500/10 text-slate-600 dark:text-slate-400",
+    default: "bg-slate-100 text-slate-600",
+    healthy: "bg-emerald-50 text-emerald-600",
+    alert: "bg-rose-50 text-rose-600",
+    learning: "bg-amber-50 text-amber-600",
+    offline: "bg-slate-100 text-slate-500",
   }[statusVariant];
 
   return (
     <div
+      data-testid={testId}
+      data-status={statusVariant !== "default" ? statusVariant : undefined}
       className={cn(
-        "rounded-xl border p-5 shadow-sm transition-all hover:shadow-md",
+        "rounded-2xl border p-5 shadow-xs transition-all hover:shadow-sm",
         variantStyles,
         className
       )}
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-muted-foreground">{label}</p>
-        <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg", iconStyles)}>
+        <p className="text-sm font-semibold text-slate-600">{label}</p>
+        <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl", iconStyles)}>
           {icon}
         </div>
       </div>
       <div className="mt-3 flex items-baseline gap-2">
-        <p className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+        <p className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl" data-metric>
           {value}
         </p>
       </div>
       {subtext && (
-        <p className="mt-1 text-xs text-muted-foreground">
+        <p className="mt-1 text-xs text-slate-400 font-medium">
           {subtext}
         </p>
       )}
     </div>
   );
 }
-

@@ -1,3 +1,4 @@
+import * as React from "react";
 import { CheckCircle2, AlertTriangle, RefreshCw, WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -14,41 +15,43 @@ export function StatusBadge({ status, className, showIcon = true }: StatusBadgeP
 
   const config = {
     HEALTHY: {
+      dataStatus: "healthy",
       label: "Healthy",
       icon: CheckCircle2,
-      badgeClass:
-        "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/50",
+      badgeClass: "bg-emerald-50 text-emerald-800 border-emerald-200",
     },
     ALERT: {
+      dataStatus: "alert",
       label: "Alert",
       icon: AlertTriangle,
-      badgeClass:
-        "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/50",
+      badgeClass: "bg-rose-50 text-rose-800 border-rose-200",
     },
     LEARNING: {
+      dataStatus: "learning",
       label: "Learning",
       icon: RefreshCw,
-      badgeClass:
-        "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/50",
+      badgeClass: "bg-amber-50 text-amber-800 border-amber-200",
     },
     OFFLINE: {
+      dataStatus: "offline",
       label: "Offline",
       icon: WifiOff,
-      badgeClass:
-        "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700",
+      badgeClass: "bg-slate-100 text-slate-700 border-slate-200",
     },
   }[normalized] || {
+    dataStatus: "default",
     label: normalized || "Unknown",
     icon: CheckCircle2,
-    badgeClass: "bg-muted text-muted-foreground border-border",
+    badgeClass: "bg-slate-100 text-slate-700 border-slate-200",
   };
 
   const Icon = config.icon;
 
   return (
     <span
+      data-status={config.dataStatus}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold select-none",
+        "status-badge inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold select-none",
         config.badgeClass,
         className
       )}
@@ -58,4 +61,3 @@ export function StatusBadge({ status, className, showIcon = true }: StatusBadgeP
     </span>
   );
 }
-

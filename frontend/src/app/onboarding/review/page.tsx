@@ -14,9 +14,9 @@ import {
   Building2,
   User as UserIcon,
   Cpu,
+  ArrowRight,
+  ArrowLeft,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { apiClient, ApiError } from "@/lib/api-client";
 import { setStoredUser } from "@/lib/auth";
 import type { User, Factory, Machine, PageMachine, DeviceCreated } from "@/types";
@@ -108,7 +108,7 @@ function ReviewContent() {
           });
           setDeviceCreated(dev);
           setFinishing(false);
-          return; // Show modal
+          return; // Show handover dialog
         } catch {
           // If device already bound or fails, proceed to dashboard
           router.push("/dashboard");
@@ -116,7 +116,7 @@ function ReviewContent() {
         }
       }
 
-      // No machines registered -> directly go to dashboard empty state
+      // No machines registered -> directly go to dashboard
       router.push("/dashboard");
     } catch (err) {
       if (err instanceof ApiError) {
@@ -140,50 +140,51 @@ function ReviewContent() {
 
   return (
     <div className="space-y-6">
-      <Card className="border-border shadow-sm">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <CheckCircle2 className="h-4 w-4" />
-            </div>
-            <div>
-              <CardTitle className="text-xl">Step 4: Review & Finalize</CardTitle>
-              <CardDescription>
-                Confirm your factory setup before activating your monitoring copilot
-              </CardDescription>
-            </div>
+      <div className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-xs">
+        {/* Header */}
+        <div className="flex items-center gap-3.5 pb-6 border-b border-slate-100">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-tr from-[#ff4724] to-[#ff7347] text-white shadow-sm shadow-[#ff5733]/20">
+            <CheckCircle2 className="h-5 w-5 stroke-[2.2]" />
           </div>
-        </CardHeader>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">
+              Step 4: Review & Finalize
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+              Confirm your factory setup before activating your monitoring copilot
+            </p>
+          </div>
+        </div>
 
-        <CardContent className="space-y-6">
+        <div className="pt-6">
           {errorMsg && (
             <div
               role="alert"
-              className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+              className="mb-5 flex items-center gap-2.5 rounded-xl border border-rose-200 bg-rose-50/90 px-3.5 py-2.5 text-sm font-medium text-rose-700"
             >
-              <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-              <span>{errorMsg}</span>
+              <AlertCircle className="h-4 w-4 shrink-0 text-rose-500" aria-hidden="true" />
+              <p>{errorMsg}</p>
             </div>
           )}
 
           {initialLoading ? (
             <div className="space-y-4 py-6">
-              <div className="h-16 w-full animate-pulse rounded bg-muted" />
-              <div className="h-16 w-full animate-pulse rounded bg-muted" />
-              <div className="h-16 w-full animate-pulse rounded bg-muted" />
+              <div className="h-16 w-full animate-pulse rounded-xl bg-slate-100" />
+              <div className="h-16 w-full animate-pulse rounded-xl bg-slate-100" />
+              <div className="h-16 w-full animate-pulse rounded-xl bg-slate-100" />
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-5">
               {/* Section 1: Personal Details */}
-              <div className="rounded-xl border border-border bg-card p-4 shadow-2xs">
-                <div className="flex items-center justify-between border-b border-border pb-3">
-                  <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-                    <UserIcon className="h-4 w-4 text-primary" />
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-4">
+                <div className="flex items-center justify-between border-b border-slate-200/60 pb-3">
+                  <div className="flex items-center gap-2 font-semibold text-sm text-slate-900">
+                    <UserIcon className="h-4 w-4 text-[#ff5733]" />
                     <span>Personal Profile</span>
                   </div>
                   <Link
                     href="/onboarding/personal"
-                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline min-h-[44px]"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#ff5733] hover:underline min-h-[44px]"
                   >
                     <Edit2 className="h-3 w-3" />
                     Edit
@@ -191,16 +192,16 @@ function ReviewContent() {
                 </div>
                 <dl className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 text-sm">
                   <div>
-                    <dt className="text-xs text-muted-foreground">Full Name</dt>
-                    <dd className="font-medium text-foreground">{user?.full_name || "—"}</dd>
+                    <dt className="text-xs text-slate-400">Full Name</dt>
+                    <dd className="font-semibold text-slate-800">{user?.full_name || "—"}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-muted-foreground">Phone Number</dt>
-                    <dd className="font-medium text-foreground">{user?.phone || "—"}</dd>
+                    <dt className="text-xs text-slate-400">Phone Number</dt>
+                    <dd className="font-semibold text-slate-800">{user?.phone || "—"}</dd>
                   </div>
                   <div>
-                    <dt className="text-xs text-muted-foreground">Voice Language</dt>
-                    <dd className="font-medium text-foreground">
+                    <dt className="text-xs text-slate-400">Voice Language</dt>
+                    <dd className="font-semibold text-slate-800">
                       {user?.language === "hi" ? "हिन्दी (Hindi)" : "English"}
                     </dd>
                   </div>
@@ -208,15 +209,15 @@ function ReviewContent() {
               </div>
 
               {/* Section 2: Factory Details */}
-              <div className="rounded-xl border border-border bg-card p-4 shadow-2xs">
-                <div className="flex items-center justify-between border-b border-border pb-3">
-                  <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-                    <Building2 className="h-4 w-4 text-primary" />
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-4">
+                <div className="flex items-center justify-between border-b border-slate-200/60 pb-3">
+                  <div className="flex items-center gap-2 font-semibold text-sm text-slate-900">
+                    <Building2 className="h-4 w-4 text-[#ff5733]" />
                     <span>Factory Details</span>
                   </div>
                   <Link
                     href="/onboarding/factory"
-                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline min-h-[44px]"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#ff5733] hover:underline min-h-[44px]"
                   >
                     <Edit2 className="h-3 w-3" />
                     Edit
@@ -225,47 +226,47 @@ function ReviewContent() {
                 {factory ? (
                   <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 text-sm">
                     <div>
-                      <dt className="text-xs text-muted-foreground">Factory Name</dt>
-                      <dd className="font-medium text-foreground">{factory.name}</dd>
+                      <dt className="text-xs text-slate-400">Factory Name</dt>
+                      <dd className="font-semibold text-slate-800">{factory.name}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-muted-foreground">Industry</dt>
-                      <dd className="font-medium text-foreground capitalize">
+                      <dt className="text-xs text-slate-400">Industry Sector</dt>
+                      <dd className="font-semibold text-slate-800 capitalize">
                         {factory.industry.replace("_", " ")}
                       </dd>
                     </div>
                     <div className="sm:col-span-2">
-                      <dt className="text-xs text-muted-foreground">Address</dt>
-                      <dd className="font-medium text-foreground">
+                      <dt className="text-xs text-slate-400">Address</dt>
+                      <dd className="font-semibold text-slate-800">
                         {factory.address_line}, {factory.city}, {factory.state} - {factory.pincode}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-muted-foreground">Workforce Size</dt>
-                      <dd className="font-medium text-foreground">{factory.employee_band}</dd>
+                      <dt className="text-xs text-slate-400">Workforce Scale</dt>
+                      <dd className="font-semibold text-slate-800">{factory.employee_band}</dd>
                     </div>
                     <div>
-                      <dt className="text-xs text-muted-foreground">GSTIN</dt>
-                      <dd className="font-medium text-foreground">{factory.gstin || "Not provided"}</dd>
+                      <dt className="text-xs text-slate-400">GSTIN</dt>
+                      <dd className="font-semibold text-slate-800">{factory.gstin || "Not provided"}</dd>
                     </div>
                   </dl>
                 ) : (
-                  <p className="text-xs text-destructive pt-3">
+                  <p className="text-xs text-rose-600 pt-3">
                     Factory details missing. Please complete Step 2.
                   </p>
                 )}
               </div>
 
               {/* Section 3: Machines */}
-              <div className="rounded-xl border border-border bg-card p-4 shadow-2xs">
-                <div className="flex items-center justify-between border-b border-border pb-3">
-                  <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-                    <Cpu className="h-4 w-4 text-primary" />
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-4">
+                <div className="flex items-center justify-between border-b border-slate-200/60 pb-3">
+                  <div className="flex items-center gap-2 font-semibold text-sm text-slate-900">
+                    <Cpu className="h-4 w-4 text-[#ff5733]" />
                     <span>Registered Machinery ({machines.length})</span>
                   </div>
                   <Link
                     href="/onboarding/machines"
-                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline min-h-[44px]"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#ff5733] hover:underline min-h-[44px]"
                   >
                     <Edit2 className="h-3 w-3" />
                     Edit
@@ -273,11 +274,10 @@ function ReviewContent() {
                 </div>
                 <div className="pt-3">
                   {machines.length === 0 ? (
-                    <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
-                      <AlertTriangle className="h-4 w-4 shrink-0" />
+                    <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 p-3 rounded-lg border border-amber-200">
+                      <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
                       <span>
-                        Machinery registration skipped. You will be able to add machines directly
-                        from the dashboard empty state.
+                        Machinery registration skipped. You will be able to register assets directly from your Fleet dashboard.
                       </span>
                     </div>
                   ) : (
@@ -285,12 +285,12 @@ function ReviewContent() {
                       {machines.map((m, idx) => (
                         <li
                           key={m.id}
-                          className="flex items-center justify-between text-xs p-2 rounded bg-muted/40"
+                          className="flex items-center justify-between text-xs p-2.5 rounded-lg bg-white border border-slate-200/70"
                         >
-                          <span className="font-medium text-foreground">
+                          <span className="font-semibold text-slate-800">
                             {idx + 1}. {m.name} ({m.machine_type.toUpperCase()})
                           </span>
-                          <span className="text-muted-foreground">{m.rated_rpm || 1450} RPM</span>
+                          <span className="text-slate-500">{m.rated_rpm || 1450} RPM</span>
                         </li>
                       ))}
                     </ul>
@@ -299,85 +299,86 @@ function ReviewContent() {
               </div>
 
               {/* Footer Actions */}
-              <div className="pt-6 border-t border-border flex items-center justify-between">
-                <Link href="/onboarding/machines">
-                  <Button type="button" variant="outline" className="min-h-[44px] px-4">
-                    ← Back
-                  </Button>
+              <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
+                <Link
+                  href="/onboarding/machines"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors min-h-[44px]"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Back</span>
                 </Link>
 
-                <Button
+                <button
                   type="button"
                   onClick={handleFinish}
                   disabled={finishing || !factory || (machines.length === 0 && !skippedParam)}
-                  className="min-h-[44px] px-8 text-base font-medium"
+                  className="h-12 min-h-[44px] px-8 flex items-center justify-center gap-2 rounded-xl bg-[#ff5733] hover:bg-[#ff451d] text-white font-semibold text-sm shadow-md shadow-[#ff5733]/25 active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#ff5733] focus:ring-offset-2"
                 >
-                  {finishing ? "Activating Copilot..." : "Finish & Activate Dashboard"}
-                </Button>
+                  <span>{finishing ? "Activating Copilot…" : "Finish & Activate Dashboard"}</span>
+                  <ArrowRight className="h-4 w-4 stroke-[2.2]" aria-hidden="true" />
+                </button>
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Device Key Handover Dialog */}
       {deviceCreated && (
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in"
         >
-          <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-5">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl space-y-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-tr from-[#ff4724] to-[#ff7347] text-white shadow-sm shadow-[#ff5733]/20">
                 <Key className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-foreground">Device Key Generated</h3>
-                <p className="text-xs text-muted-foreground">
-                  Binding for &ldquo;{machines[0]?.name || "First Machine"}&rdquo;
+                <h3 className="text-lg font-bold text-slate-900">Device Key Generated</h3>
+                <p className="text-xs text-slate-500">
+                  Sensor binding for &ldquo;{machines[0]?.name || "First Asset"}&rdquo;
                 </p>
               </div>
             </div>
 
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5">
-              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+            <div className="rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-xs text-amber-900 flex items-start gap-2.5">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
               <div>
-                <p className="font-semibold">Save this key now!</p>
+                <p className="font-bold">Save this key now!</p>
                 <p className="mt-0.5">
-                  This raw device key is shown exactly once and cannot be retrieved again from the
-                  system.
+                  This raw device key is shown exactly once and cannot be retrieved again from the system.
                 </p>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-foreground">Device Key</label>
+              <label className="text-xs font-semibold text-slate-800">256-bit Sensor Device Key</label>
               <div className="flex items-center gap-2">
-                <code className="flex-1 rounded-lg border border-border bg-muted/60 p-2.5 font-mono text-xs text-foreground select-all break-all">
+                <code className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-900 select-all break-all">
                   {deviceCreated.device_key}
                 </code>
-                <Button
+                <button
                   type="button"
-                  variant="outline"
                   onClick={handleCopyKey}
-                  className="shrink-0 min-h-[44px] min-w-[44px]"
+                  className="h-11 w-11 shrink-0 flex items-center justify-center rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 shadow-xs transition-colors cursor-pointer"
                   aria-label="Copy device key"
                 >
                   {copied ? (
-                    <Check className="h-4 w-4 text-emerald-600" />
+                    <Check className="h-4 w-4 text-emerald-600 stroke-[2.5]" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}
-                </Button>
+                </button>
               </div>
               {copied && (
-                <p className="text-xs text-emerald-600 font-medium">Copied to clipboard!</p>
+                <p className="text-xs text-emerald-600 font-semibold">Copied to clipboard!</p>
               )}
             </div>
 
-            <div className="rounded-lg bg-muted/30 p-3 text-xs text-muted-foreground space-y-1.5">
-              <p className="font-medium text-foreground">Next steps for ESP32 edge deployment:</p>
+            <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-3 text-xs text-slate-600 space-y-1.5">
+              <p className="font-semibold text-slate-800">Deployment instructions for ESP32 sensor:</p>
               <ol className="list-decimal list-inside space-y-1 text-xs">
                 <li>Flash the firmware onto your ESP32 accelerometer board.</li>
                 <li>Configure the Wi-Fi credentials and paste this device key into config.</li>
@@ -385,28 +386,29 @@ function ReviewContent() {
               </ol>
             </div>
 
-            <div className="flex items-center gap-2 pt-2">
+            <div className="flex items-center gap-2 pt-1">
               <input
                 id="ack-key"
                 type="checkbox"
                 checked={acknowledged}
                 onChange={(e) => setAcknowledged(e.target.checked)}
-                className="h-4 w-4 rounded border-border text-primary focus:ring-primary min-h-[20px] min-w-[20px]"
+                className="h-4 w-4 rounded border-slate-300 text-[#ff5733] focus:ring-[#ff5733]/30 cursor-pointer accent-[#ff5733]"
               />
-              <label htmlFor="ack-key" className="text-xs text-foreground cursor-pointer select-none">
+              <label htmlFor="ack-key" className="text-xs font-medium text-slate-700 cursor-pointer select-none">
                 I have securely copied and saved this device key
               </label>
             </div>
 
             <div className="pt-2">
-              <Button
+              <button
                 type="button"
                 onClick={handleEnterDashboard}
                 disabled={!acknowledged}
-                className="w-full min-h-[44px] text-base font-medium"
+                className="w-full h-12 min-h-[44px] flex items-center justify-center gap-2 rounded-xl bg-[#ff5733] hover:bg-[#ff451d] text-white font-semibold text-sm shadow-md shadow-[#ff5733]/25 active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#ff5733] focus:ring-offset-2"
               >
-                Enter Dashboard →
-              </Button>
+                <span>Enter Dashboard</span>
+                <ArrowRight className="h-4 w-4 stroke-[2.2]" aria-hidden="true" />
+              </button>
             </div>
           </div>
         </div>
@@ -419,7 +421,7 @@ export default function ReviewOnboardingPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="py-12 text-center text-sm text-muted-foreground animate-pulse">
+        <div className="py-12 text-center text-sm text-slate-400 animate-pulse">
           Loading review summary...
         </div>
       }

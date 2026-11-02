@@ -11,16 +11,14 @@ import {
   WifiOff,
   Plus,
   ArrowRight,
-  Wifi,
   ExternalLink,
+  RefreshCw,
 } from "lucide-react";
 import { AppShell } from "@/components/shell/app-shell";
 import { StatCard } from "@/components/shell/stat-card";
 import { StatusBadge } from "@/components/shell/status-badge";
 import { AlertsBarChart } from "@/components/charts/alerts-bar-chart";
 import { RmsLineChart } from "@/components/charts/rms-line-chart";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { apiClient } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
 import { isAuthenticated, getStoredUser } from "@/lib/auth";
@@ -70,7 +68,7 @@ export default function DashboardPage() {
   }, [machines, selectedMachineId]);
 
   // 2. Fetch Events / Alerts
-  const { data: eventsData, isLoading: eventsLoading } = useQuery<PageEvent>({
+  const { data: eventsData, isLoading: eventsLoading, refetch: refetchEvents } = useQuery<PageEvent>({
     queryKey: queryKeys.events.list(),
     queryFn: () => apiClient.get<PageEvent>("/v1/events?limit=50"),
   });
@@ -84,19 +82,18 @@ export default function DashboardPage() {
     enabled: !!selectedMachineId,
   });
 
-  // Calculate Summary KPIs (Strictly 4 cards per design spec)
+  // KPI figures
   const totalMachines = machines.length;
   const healthyCount = machines.filter((m) => m.status === "HEALTHY").length;
-  const openAlertsCount = machines.reduce((acc, m) => acc + (m.open_alerts || 0), 0);
+  const criticalAlertsCount = events.filter((e) => e.severity === "HIGH" || e.status === "ANOMALY_DETECTED" || e.status === "CALLING").length;
   const offlineCount = machines.filter((m) => !m.device_online).length;
 
-  // Process 14-day alert distribution for bar chart
+  // Process 7-day anomaly distribution for bar chart
   const alertsChartData = React.useMemo(() => {
     const days: Record<string, number> = {};
     const now = new Date();
 
-    // Initialize last 14 days with 0 in IST
-    for (let i = 13; i >= 0; i--) {
+    for (let i = 6; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
       const label = d.toLocaleDateString("en-IN", {
         timeZone: "Asia/Kolkata",
@@ -128,15 +125,16 @@ export default function DashboardPage() {
   if (machinesLoading || eventsLoading) {
     return (
       <AppShell title="Dashboard">
-        <div className="space-y-6 animate-pulse">
+        <div className="space-y-6 animate-pulse" aria-busy="true" aria-label="Loading fleet dashboard">
+          <div className="h-10 w-48 bg-slate-200 rounded-xl" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-28 rounded-xl bg-card border border-border" />
+              <div key={i} className="h-28 rounded-2xl bg-white border border-slate-200" />
             ))}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="h-72 rounded-xl bg-card border border-border" />
-            <div className="h-72 rounded-xl bg-card border border-border" />
+            <div className="h-72 rounded-2xl bg-white border border-slate-200" />
+            <div className="h-72 rounded-2xl bg-white border border-slate-200" />
           </div>
         </div>
       </AppShell>
@@ -144,209 +142,213 @@ export default function DashboardPage() {
   }
 
   return (
-    <AppShell title="Dashboard">
-      {/* Empty State for New Owner */}
-      {machines.length === 0 ? (
-        <Card className="border-dashed border-2 border-border p-8 sm:p-12 text-center shadow-xs">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Cpu className="h-7 w-7" />
+    <AppShell title="Fleet Command Center">
+      <section data-route="/dashboard" aria-labelledby="dash-title" data-testid="page-dashboard" className="space-y-6">
+        {/* Header */}
+        <header className="page-header flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+          <div>
+            <h1 id="dash-title" className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+              Fleet overview
+            </h1>
+            <p className="page-meta text-xs sm:text-sm text-slate-500 mt-1">
+              Updated <time dateTime={new Date().toISOString()}>just now</time> &bull; India Standard Time (IST)
+            </p>
           </div>
-          <h2 className="mt-5 text-xl font-bold tracking-tight text-foreground">
-            No machinery registered yet
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
-            Get started by registering an industrial asset and binding an ESP32 accelerometer sensor
-            node to monitor continuous mechanical vibration and receive automated AI voice alerts.
-          </p>
-          <div className="mt-6 flex justify-center">
-            <Link href="/machines/new">
-              <Button className="min-h-[44px] px-6 text-sm font-semibold">
-                <Plus className="h-4 w-4 mr-2" />
-                Register First Machine
-              </Button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => refetchEvents()}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-xl shadow-xs transition-colors min-h-[44px] cursor-pointer"
+            >
+              <RefreshCw className="h-3.5 w-3.5 text-[#ff5733]" />
+              <span>Refresh data</span>
+            </button>
+            <Link
+              href="/machines/new"
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-[#ff5733] hover:bg-[#ff451d] rounded-xl shadow-xs transition-colors min-h-[44px]"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Register Machine</span>
             </Link>
           </div>
-        </Card>
-      ) : (
-        <div className="space-y-6">
-          {/* Four Summary KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              label="Machines"
-              value={totalMachines}
-              subtext="Total fleet monitored"
-              icon={<Cpu className="h-5 w-5" />}
-              statusVariant="default"
-            />
-            <StatCard
-              label="Healthy"
-              value={healthyCount}
-              subtext={`${healthyCount} of ${totalMachines} nominal`}
-              icon={<CheckCircle2 className="h-5 w-5" />}
-              statusVariant="healthy"
-            />
-            <StatCard
-              label="Open alerts"
-              value={openAlertsCount}
-              subtext={openAlertsCount > 0 ? "Requires shop-floor inspection" : "No open anomalies"}
-              icon={<AlertTriangle className="h-5 w-5" />}
-              statusVariant={openAlertsCount > 0 ? "alert" : "default"}
-            />
-            <StatCard
-              label="Devices offline"
-              value={offlineCount}
-              subtext={offlineCount > 0 ? "Check sensor node power" : "All nodes reporting"}
-              icon={<WifiOff className="h-5 w-5" />}
-              statusVariant={offlineCount > 0 ? "offline" : "default"}
-            />
-          </div>
+        </header>
 
-          {/* Two Charts Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <AlertsBarChart data={alertsChartData} />
-            <RmsLineChart
-              machines={machines}
-              selectedMachineId={selectedMachineId}
-              onSelectMachine={setSelectedMachineId}
-              trendData={trendData?.points ?? []}
-            />
-          </div>
-
-          {/* Machine Fleet List */}
-          <Card className="border-border shadow-xs">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <div>
-                <CardTitle className="text-base font-semibold">Machinery Fleet Status</CardTitle>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Live presence and status across all registered assets
-                </p>
-              </div>
-              <Link href="/machines">
-                <Button variant="ghost" size="sm" className="text-xs min-h-[44px]">
-                  View all <ArrowRight className="h-3.5 w-3.5 ml-1" />
-                </Button>
+        {/* Empty State for New Owner */}
+        {machines.length === 0 ? (
+          <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-white p-8 sm:p-12 text-center shadow-xs">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ff5733]/10 text-[#ff5733]">
+              <Cpu className="h-7 w-7" />
+            </div>
+            <h2 className="mt-5 text-xl font-bold tracking-tight text-slate-900">
+              Add your first machine
+            </h2>
+            <p className="mt-2 text-sm text-slate-500 max-w-md mx-auto">
+              Kito will list mechanical anomalies and telemetry here once an accelerometer sensor reports. Register a machine to begin continuous baseline learning.
+            </p>
+            <div className="mt-6 flex justify-center">
+              <Link
+                href="/machines/new"
+                className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-[#ff5733] hover:bg-[#ff451d] text-white font-semibold text-sm shadow-md shadow-[#ff5733]/25 transition-all min-h-[44px]"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Register a machine</span>
               </Link>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="border-b border-border text-xs font-semibold uppercase text-muted-foreground">
-                    <tr>
-                      <th className="pb-3 pr-4">Machine</th>
-                      <th className="pb-3 px-4">Status</th>
-                      <th className="pb-3 px-4">Device Node</th>
-                      <th className="pb-3 px-4">Last Check-in (IST)</th>
-                      <th className="pb-3 pl-4 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {machines.map((machine) => (
-                      <tr key={machine.id} className="hover:bg-muted/40 transition-colors">
-                        <td className="py-3 pr-4 font-medium text-foreground">
-                          <div>
-                            <span>{machine.name}</span>
-                            <span className="block text-xs font-normal text-muted-foreground capitalize">
-                              {machine.machine_type} &bull; {machine.rated_rpm || 1450} RPM
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <StatusBadge status={machine.status} />
-                        </td>
-                        <td className="py-3 px-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 text-xs font-medium ${
-                              machine.device_online
-                                ? "text-emerald-600 dark:text-emerald-400"
-                                : "text-slate-500 dark:text-slate-400"
-                            }`}
-                          >
-                            {machine.device_online ? (
-                              <Wifi className="h-3.5 w-3.5" />
-                            ) : (
-                              <WifiOff className="h-3.5 w-3.5" />
-                            )}
-                            {machine.device_online ? "Online" : "Offline"}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-xs text-muted-foreground">
-                          {formatISTDateTime(machine.last_seen_at)}
-                        </td>
-                        <td className="py-3 pl-4 text-right">
-                          <Link href={`/machines/${machine.id}`}>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-xs min-h-[44px] min-w-[44px]"
-                              aria-label={`View details for ${machine.name}`}
-                            >
-                              Details
-                            </Button>
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* KPI Grid */}
+            <section aria-labelledby="kpi-title">
+              <h2 id="kpi-title" className="sr-only">Key figures</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" role="list">
+                <StatCard
+                  testId="kpi-total"
+                  label="Total assets"
+                  value={totalMachines}
+                  subtext="Monitored fleet"
+                  icon={<Cpu className="h-5 w-5" />}
+                  statusVariant="default"
+                />
+                <StatCard
+                  testId="kpi-healthy"
+                  label="Healthy"
+                  value={healthyCount}
+                  subtext={`${healthyCount} nominal`}
+                  icon={<CheckCircle2 className="h-5 w-5" />}
+                  statusVariant="healthy"
+                />
+                <StatCard
+                  testId="kpi-critical"
+                  label="Critical alerts"
+                  value={criticalAlertsCount}
+                  subtext={criticalAlertsCount > 0 ? "Requires inspection" : "No open anomalies"}
+                  icon={<AlertTriangle className="h-5 w-5" />}
+                  statusVariant={criticalAlertsCount > 0 ? "alert" : "default"}
+                />
+                <StatCard
+                  testId="kpi-offline"
+                  label="Offline nodes"
+                  value={offlineCount}
+                  subtext={offlineCount > 0 ? "Check sensor node power" : "All nodes reporting"}
+                  icon={<WifiOff className="h-5 w-5" />}
+                  statusVariant={offlineCount > 0 ? "offline" : "default"}
+                />
               </div>
-            </CardContent>
-          </Card>
+            </section>
 
-          {/* Recent Alerts List (Last 5) */}
-          <Card className="border-border shadow-xs">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <div>
-                <CardTitle className="text-base font-semibold">Recent Anomaly Alerts</CardTitle>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Latest 5 anomaly events detected by vibration intelligence
-                </p>
-              </div>
-              <Link href="/alerts">
-                <Button variant="ghost" size="sm" className="text-xs min-h-[44px]">
+            {/* Two Charts Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <RmsLineChart
+                machines={machines}
+                selectedMachineId={selectedMachineId}
+                onSelectMachine={setSelectedMachineId}
+                trendData={trendData?.points ?? []}
+              />
+              <AlertsBarChart data={alertsChartData} />
+            </div>
+
+            {/* Recent Anomaly Alerts Table (Full Width) */}
+            <section
+              className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs"
+              aria-labelledby="recent-title"
+            >
+              <header className="flex flex-row items-center justify-between pb-4 border-b border-slate-100">
+                <div>
+                  <h2 id="recent-title" className="text-base font-bold text-slate-900">
+                    Recent anomaly alerts
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Last five anomaly alerts, newest first
+                  </p>
+                </div>
+                <Link
+                  href="/alerts"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#ff5733] hover:underline min-h-[44px]"
+                >
                   All alerts <ArrowRight className="h-3.5 w-3.5 ml-1" />
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent>
-              {recentAlerts.length === 0 ? (
-                <div className="py-6 text-center text-xs text-muted-foreground">
-                  No anomaly alerts recorded. All machinery running within baseline thresholds.
-                </div>
-              ) : (
-                <div className="divide-y divide-border">
-                  {recentAlerts.map((alert) => (
-                    <Link
-                      key={alert.id}
-                      href={`/events/${alert.id}`}
-                      className="flex items-center justify-between py-3 hover:bg-muted/40 transition-colors rounded-lg px-2 min-h-[44px]"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400">
-                          <AlertTriangle className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-foreground">
-                            {machines.find((m) => m.id === alert.machine_id)?.name ||
-                              `Machine ${alert.machine_id.slice(-6)}`}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            RMS: {alert.rms_g.toFixed(2)}g &bull; Triggered:{" "}
-                            {formatISTDateTime(alert.created_at)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <StatusBadge status={alert.status} />
-                        <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
+                </Link>
+              </header>
+
+              <div className="table-scroll mt-2">
+                {recentAlerts.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-slate-400">
+                    No alerts recorded yet. Kito will list anomalies here once a sensor reports.
+                  </div>
+                ) : (
+                  <table className="w-full text-left text-sm" data-testid="recent-alerts">
+                    <caption className="sr-only">Last five anomaly alerts, newest first</caption>
+                    <thead className="border-b border-slate-200 text-xs font-semibold uppercase text-slate-500">
+                      <tr>
+                        <th scope="col" className="py-3 pr-4">Time</th>
+                        <th scope="col" className="py-3 px-4">Machine</th>
+                        <th scope="col" className="py-3 px-4">Severity</th>
+                        <th scope="col" className="py-3 px-4">Status</th>
+                        <th scope="col" className="py-3 px-4">Reference</th>
+                        <th scope="col" className="py-3 pl-4 text-right">
+                          <span className="sr-only">Open</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {recentAlerts.map((alert) => {
+                        const machineName =
+                          machines.find((m) => m.id === alert.machine_id)?.name ||
+                          `Machine ${alert.machine_id.slice(-6)}`;
+                        const refCode = alert.id.slice(0, 8).toUpperCase();
+
+                        return (
+                          <tr key={alert.id} className="hover:bg-slate-50/80 transition-colors">
+                            <td className="py-3.5 pr-4 text-xs font-medium text-slate-600 whitespace-nowrap">
+                              <time dateTime={alert.created_at}>
+                                {formatISTDateTime(alert.created_at)}
+                              </time>
+                            </td>
+                            <td className="py-3.5 px-4 font-semibold text-slate-900 whitespace-nowrap">
+                              {machineName}
+                            </td>
+                            <td className="py-3.5 px-4 whitespace-nowrap">
+                              <span
+                                className={`status-badge inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                  alert.severity === "HIGH"
+                                    ? "bg-rose-50 text-rose-700 border border-rose-200"
+                                    : alert.severity === "MEDIUM"
+                                    ? "bg-orange-50 text-orange-700 border border-orange-200"
+                                    : "bg-amber-50 text-amber-700 border border-amber-200"
+                                }`}
+                              >
+                                <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+                                {alert.severity || "Warning"}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4 whitespace-nowrap">
+                              <StatusBadge status={alert.status} />
+                            </td>
+                            <td className="py-3.5 px-4 whitespace-nowrap">
+                              <code className="px-2 py-1 rounded bg-slate-100 text-xs font-mono font-bold text-slate-800">
+                                {refCode}
+                              </code>
+                            </td>
+                            <td className="py-3.5 pl-4 text-right whitespace-nowrap">
+                              <Link
+                                href={`/events/${alert.id}`}
+                                className="inline-flex items-center gap-1 text-xs font-bold text-[#ff5733] hover:underline min-h-[44px] min-w-[44px] justify-end"
+                              >
+                                <span>Open</span>
+                                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                                <span className="sr-only"> alert {refCode}</span>
+                              </Link>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </section>
+          </div>
+        )}
+      </section>
     </AppShell>
   );
 }

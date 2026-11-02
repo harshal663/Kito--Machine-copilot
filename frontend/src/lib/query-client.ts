@@ -4,8 +4,8 @@ export function createQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 10_000, // 10s default cache fresh window
-        gcTime: 5 * 60_000, // 5m cache retention
+        staleTime: 30_000, // 30s fresh window prevents redundant fetches on page switch
+        gcTime: 10 * 60_000, // 10m cache retention
         retry: (failureCount, error) => {
           // Do not retry 4xx client errors
           if (
@@ -21,6 +21,7 @@ export function createQueryClient(): QueryClient {
           return failureCount < 2;
         },
         refetchOnWindowFocus: false,
+        refetchOnReconnect: "always",
       },
       mutations: {
         retry: false,

@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { apiClient, ApiError } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
 import { isAuthenticated } from "@/lib/auth";
@@ -140,34 +139,41 @@ export default function FactoryPage() {
   return (
     <AppShell title="Factory Profile">
       <div className="max-w-3xl space-y-6">
-        <Card className="border-border shadow-xs">
-          <CardHeader className="space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Building2 className="h-4 w-4" />
-              </div>
-              <div>
-                <CardTitle className="text-lg">Factory Profile & Plant Location</CardTitle>
-                <CardDescription>
-                  Manage the registered plant details for industrial machinery tracking
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
+        <div>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            Factory Profile
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Plant location, operational metadata, and industrial sector classification.
+          </p>
+        </div>
 
-          <CardContent>
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-6 sm:p-8 shadow-sm">
+          <div className="flex items-center gap-3 pb-5 border-b border-slate-100">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-[#ff5733] ring-1 ring-[#ff5733]/20">
+              <Building2 className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">Plant Location & Operations</h2>
+              <p className="text-xs text-slate-500">
+                Registered manufacturing location for industrial machinery tracking
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-6">
             {errorMsg && (
               <div
                 role="alert"
-                className="mb-4 flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+                className="mb-5 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-700"
               >
-                <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
             {savedSuccess && (
-              <div className="mb-4 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-300">
+              <div className="mb-5 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-semibold text-emerald-700">
                 <Check className="h-4 w-4 shrink-0" />
                 <span>Factory profile updated successfully.</span>
               </div>
@@ -175,86 +181,98 @@ export default function FactoryPage() {
 
             {isLoading ? (
               <div className="space-y-4 py-8 animate-pulse">
-                <div className="h-10 w-full rounded bg-muted" />
-                <div className="h-10 w-full rounded bg-muted" />
-                <div className="h-10 w-full rounded bg-muted" />
+                <div className="h-11 w-full rounded-xl bg-slate-100" />
+                <div className="h-11 w-full rounded-xl bg-slate-100" />
+                <div className="h-11 w-full rounded-xl bg-slate-100" />
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5 sm:col-span-2">
-                    <Label htmlFor="facName">Factory Name</Label>
+                    <Label htmlFor="facName" className="text-xs font-semibold text-slate-700">
+                      Factory Name
+                    </Label>
                     <Input
                       id="facName"
                       type="text"
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="h-11 min-h-[44px]"
+                      className="h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15"
                     />
                     {fieldErrors.name && (
-                      <p className="text-xs text-destructive">{fieldErrors.name}</p>
+                      <p className="text-xs text-rose-600 mt-1">{fieldErrors.name}</p>
                     )}
                   </div>
 
                   <div className="space-y-1.5 sm:col-span-2">
-                    <Label htmlFor="facIndustry">Industry Sector</Label>
+                    <Label htmlFor="facIndustry" className="text-xs font-semibold text-slate-700">
+                      Industry Sector
+                    </Label>
                     <Select
                       id="facIndustry"
                       value={industry}
                       onChange={(e) => setIndustry(e.target.value)}
                       options={INDUSTRY_OPTIONS}
-                      className="h-11 min-h-[44px]"
+                      className="h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15"
                     />
                   </div>
 
                   <div className="space-y-1.5 sm:col-span-2">
-                    <Label htmlFor="facAddress">Plant Street Address</Label>
+                    <Label htmlFor="facAddress" className="text-xs font-semibold text-slate-700">
+                      Plant Street Address
+                    </Label>
                     <Input
                       id="facAddress"
                       type="text"
                       required
                       value={addressLine}
                       onChange={(e) => setAddressLine(e.target.value)}
-                      className="h-11 min-h-[44px]"
+                      className="h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15"
                     />
                     {fieldErrors.addressLine && (
-                      <p className="text-xs text-destructive">{fieldErrors.addressLine}</p>
+                      <p className="text-xs text-rose-600 mt-1">{fieldErrors.addressLine}</p>
                     )}
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="facCity">City</Label>
+                    <Label htmlFor="facCity" className="text-xs font-semibold text-slate-700">
+                      City
+                    </Label>
                     <Input
                       id="facCity"
                       type="text"
                       required
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
-                      className="h-11 min-h-[44px]"
+                      className="h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15"
                     />
                     {fieldErrors.city && (
-                      <p className="text-xs text-destructive">{fieldErrors.city}</p>
+                      <p className="text-xs text-rose-600 mt-1">{fieldErrors.city}</p>
                     )}
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="facState">State</Label>
+                    <Label htmlFor="facState" className="text-xs font-semibold text-slate-700">
+                      State
+                    </Label>
                     <Input
                       id="facState"
                       type="text"
                       required
                       value={state}
                       onChange={(e) => setState(e.target.value)}
-                      className="h-11 min-h-[44px]"
+                      className="h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15"
                     />
                     {fieldErrors.state && (
-                      <p className="text-xs text-destructive">{fieldErrors.state}</p>
+                      <p className="text-xs text-rose-600 mt-1">{fieldErrors.state}</p>
                     )}
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="facPincode">PIN Code</Label>
+                    <Label htmlFor="facPincode" className="text-xs font-semibold text-slate-700">
+                      PIN Code (6 digits)
+                    </Label>
                     <Input
                       id="facPincode"
                       type="text"
@@ -262,36 +280,40 @@ export default function FactoryPage() {
                       maxLength={6}
                       value={pincode}
                       onChange={(e) => setPincode(e.target.value)}
-                      className="h-11 min-h-[44px]"
+                      className="h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15 font-mono"
                     />
                     {fieldErrors.pincode && (
-                      <p className="text-xs text-destructive">{fieldErrors.pincode}</p>
+                      <p className="text-xs text-rose-600 mt-1">{fieldErrors.pincode}</p>
                     )}
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="facBand">Workforce Size</Label>
+                    <Label htmlFor="facBand" className="text-xs font-semibold text-slate-700">
+                      Workforce Size
+                    </Label>
                     <Select
                       id="facBand"
                       value={employeeBand}
                       onChange={(e) => setEmployeeBand(e.target.value)}
                       options={EMPLOYEE_BANDS}
-                      className="h-11 min-h-[44px]"
+                      className="h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15"
                     />
                   </div>
 
                   <div className="space-y-1.5 sm:col-span-2">
-                    <Label htmlFor="facGstin">GSTIN</Label>
+                    <Label htmlFor="facGstin" className="text-xs font-semibold text-slate-700">
+                      GSTIN (Optional)
+                    </Label>
                     <Input
                       id="facGstin"
                       type="text"
                       maxLength={15}
                       value={gstin}
                       onChange={(e) => setGstin(e.target.value.toUpperCase())}
-                      className="h-11 min-h-[44px] uppercase"
+                      className="h-11 rounded-xl border-slate-200 bg-[#f7f7f8] text-sm text-slate-900 focus:bg-white focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15 font-mono uppercase"
                     />
                     {fieldErrors.gstin && (
-                      <p className="text-xs text-destructive">{fieldErrors.gstin}</p>
+                      <p className="text-xs text-rose-600 mt-1">{fieldErrors.gstin}</p>
                     )}
                   </div>
                 </div>
@@ -300,18 +322,17 @@ export default function FactoryPage() {
                   <Button
                     type="submit"
                     disabled={updateMutation.isPending}
-                    className="min-h-[44px] px-6 text-sm font-medium"
+                    className="min-h-[44px] px-6 text-xs font-semibold bg-[#ff5733] hover:bg-[#e04522] text-white shadow-sm gap-2"
                   >
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="h-4 w-4" />
                     {updateMutation.isPending ? "Saving..." : "Save Changes"}
                   </Button>
                 </div>
               </form>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </AppShell>
   );
 }
-

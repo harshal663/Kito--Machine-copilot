@@ -57,6 +57,9 @@ yarn-error.log*
 .piolibdeps/
 firmware/.pio/
 firmware/include/secrets.h
+firmware/test_runner
+firmware/test_runner.exe
+*.exe
 
 # IDE & OS
 .vscode/

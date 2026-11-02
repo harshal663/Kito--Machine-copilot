@@ -41,31 +41,33 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "flex h-full flex-col justify-between border-r border-border bg-card transition-all duration-300",
+        "flex h-full flex-col justify-between border-r border-slate-200/90 bg-white transition-all duration-300",
         collapsed ? "w-[68px]" : "w-[260px]",
         className
       )}
     >
       <div>
         {/* Brand header */}
-        <div className="flex h-16 items-center justify-between border-b border-border px-4">
+        <div className="flex h-16 items-center justify-between border-b border-slate-200/80 px-4">
           <Link
             href="/dashboard"
             onClick={onNavigate ? () => onNavigate() : () => {}}
-            className="flex items-center gap-2.5 font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded-md min-h-[44px]"
+            className="flex items-center gap-3 font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#ff5733] rounded-lg min-h-[44px]"
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-              <Radio className="h-5 w-5 animate-pulse" />
+            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-[#ff4724] to-[#ff7347] text-white shadow-sm shadow-[#ff5733]/20 ring-2 ring-[#ff5733]/15">
+              <Radio className="h-5 w-5 stroke-[2.2]" />
             </div>
             {!collapsed && (
-              <span className="text-base font-semibold tracking-tight">Machine Copilot</span>
+              <span className="text-base font-bold tracking-tight text-slate-900">
+                Machine Copilot
+              </span>
             )}
           </Link>
           {onToggleCollapse && (
             <button
               type="button"
               onClick={onToggleCollapse}
-              className="hidden lg:flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="hidden lg:flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff5733]"
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
@@ -89,13 +91,13 @@ export function Sidebar({
                 onClick={onNavigate ? () => onNavigate() : () => {}}
                 title={collapsed ? item.label : ""}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors min-h-[44px] focus:outline-none focus:ring-2 focus:ring-ring",
+                  "flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#ff5733]",
                   isActive
-                    ? "bg-primary text-primary-foreground shadow-sm font-semibold"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    ? "bg-[#ff5733] text-white shadow-xs font-semibold"
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 )}
               >
-                <Icon className={cn("h-5 w-5 shrink-0", isActive ? "text-primary-foreground" : "")} />
+                <Icon className={cn("h-5 w-5 shrink-0", isActive ? "text-white" : "text-slate-400")} />
                 {!collapsed && <span>{item.label}</span>}
               </Link>
             );
@@ -105,9 +107,9 @@ export function Sidebar({
 
       {/* Footer / System status info */}
       {!collapsed && (
-        <div className="border-t border-border p-4 text-xs text-muted-foreground">
-          <p className="font-medium text-foreground">Edge-to-Voice Copilot</p>
-          <p className="mt-0.5">Continuous shop floor monitoring</p>
+        <div className="border-t border-slate-200/80 p-4 text-xs text-slate-500">
+          <p className="font-semibold text-slate-800">Edge-to-Voice Copilot</p>
+          <p className="mt-0.5 text-slate-400">Continuous shop floor monitoring</p>
         </div>
       )}
     </aside>
