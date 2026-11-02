@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Eye, EyeOff, Mail, Lock, User as UserIcon, ArrowRight, Radio } from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Mail, Lock, User as UserIcon, ArrowRight } from "lucide-react";
 import { apiClient, ApiError } from "@/lib/api-client";
 import { setStoredToken, setStoredUser } from "@/lib/auth";
 import type { TokenOut } from "@/types";
@@ -102,24 +102,60 @@ export default function SignUpPage() {
       </a>
 
       <main className="w-full max-w-[420px]">
-        {/* Top Centered Glowing Badge */}
-        <div className="flex justify-center mb-5">
-          <div className="relative flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-tr from-[#ff4724] to-[#ff7347] shadow-lg shadow-[#ff5733]/30 ring-4 ring-[#ff5733]/15">
-            <Radio className="w-7 h-7 text-white stroke-[2.2] animate-pulse" />
+        {/* Top Centered Squircle Badge with Concentric Ring */}
+        <div className="flex justify-center mb-6">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-b from-[#ff6b4a] to-[#ff4827] shadow-lg shadow-[#ff5733]/25 flex items-center justify-center">
+            <svg
+              className="w-7 h-7 text-white"
+              viewBox="0 0 28 28"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <circle
+                cx="14"
+                cy="14"
+                r="8"
+                stroke="white"
+                strokeWidth="3.5"
+              />
+            </svg>
           </div>
         </div>
 
         {/* Heading & Subtitle */}
-        <div className="text-center mb-7">
+        <div className="text-center mb-6">
           <h1
             id="sign-up-title"
-            className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900"
+            className="text-2xl sm:text-[28px] font-bold tracking-tight text-slate-900"
           >
             Create your account
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-500 max-w-[320px] mx-auto leading-relaxed">
             You will set up your factory and machines next.
           </p>
+        </div>
+
+        {/* Social Connect Button */}
+        <button
+          type="button"
+          onClick={() => {}}
+          className="w-full h-11 min-h-[44px] flex items-center justify-center gap-2.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 shadow-2xs transition-all active:scale-[0.99] cursor-pointer"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="#1877F2" aria-hidden="true">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+          </svg>
+          <span>Connect with Facebook</span>
+        </button>
+
+        {/* Divider */}
+        <div className="relative my-5 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-slate-200" />
+          </div>
+          <span className="relative bg-[#f7f7f8] px-3 text-xs text-slate-400 font-normal">
+            or sign up with email
+          </span>
         </div>
 
         {/* Error Alert */}
@@ -147,7 +183,7 @@ export default function SignUpPage() {
           <div>
             <label
               htmlFor="su-name"
-              className="block text-sm font-semibold text-slate-800 mb-1.5"
+              className="block text-sm font-semibold text-slate-900 mb-1.5"
             >
               Full name
             </label>
@@ -175,7 +211,7 @@ export default function SignUpPage() {
                   }
                 }}
                 placeholder="Anil Kumar"
-                className="w-full h-12 min-h-[44px] rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-[#ff5733] focus:ring-2 focus:ring-[#ff5733]/20 focus:outline-none transition-all"
+                className="w-full h-11 min-h-[44px] rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-2xs focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15 focus:outline-none transition-all"
               />
             </div>
             {fieldErrors.name && (
@@ -189,7 +225,7 @@ export default function SignUpPage() {
           <div>
             <label
               htmlFor="su-email"
-              className="block text-sm font-semibold text-slate-800 mb-1.5"
+              className="block text-sm font-semibold text-slate-900 mb-1.5"
             >
               Work email
             </label>
@@ -219,7 +255,7 @@ export default function SignUpPage() {
                   }
                 }}
                 placeholder="name@factory.com"
-                className="w-full h-12 min-h-[44px] rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-[#ff5733] focus:ring-2 focus:ring-[#ff5733]/20 focus:outline-none transition-all"
+                className="w-full h-11 min-h-[44px] rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-2xs focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15 focus:outline-none transition-all"
               />
             </div>
             <p id="su-email-hint" className="mt-1 text-xs text-slate-400">
@@ -236,7 +272,7 @@ export default function SignUpPage() {
           <div>
             <label
               htmlFor="su-password"
-              className="block text-sm font-semibold text-slate-800 mb-1.5"
+              className="block text-sm font-semibold text-slate-900 mb-1.5"
             >
               Password
             </label>
@@ -264,11 +300,11 @@ export default function SignUpPage() {
                   }
                 }}
                 placeholder="Enter at least 12 characters"
-                className="w-full h-12 min-h-[44px] rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-[#ff5733] focus:ring-2 focus:ring-[#ff5733]/20 focus:outline-none transition-all"
+                className="w-full h-11 min-h-[44px] rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-sm text-slate-900 placeholder:text-slate-400 shadow-2xs focus:border-[#ff5733] focus:ring-4 focus:ring-[#ff5733]/15 focus:outline-none transition-all"
               />
               <button
                 type="button"
-                className="absolute right-2.5 h-9 w-9 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff5733]"
+                className="absolute right-2.5 h-8 w-8 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#ff5733]"
                 aria-pressed={showPassword}
                 aria-label={showPassword ? "Hide password" : "Show password"}
                 onClick={() => setShowPassword((prev) => !prev)}
@@ -291,7 +327,7 @@ export default function SignUpPage() {
           </div>
 
           {/* Terms checkbox */}
-          <div className="flex items-center gap-2 pt-1">
+          <div className="flex items-center gap-2 pt-0.5">
             <input
               id="agree-terms"
               type="checkbox"
@@ -301,7 +337,7 @@ export default function SignUpPage() {
             />
             <label
               htmlFor="agree-terms"
-              className="text-xs sm:text-sm text-slate-600 cursor-pointer select-none"
+              className="text-xs sm:text-sm text-slate-700 cursor-pointer select-none font-normal"
             >
               Agree to shop floor monitoring guidelines
             </label>
@@ -311,7 +347,7 @@ export default function SignUpPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-12 min-h-[44px] mt-2 flex items-center justify-center gap-2 rounded-xl bg-[#ff5733] hover:bg-[#ff451d] text-white font-semibold text-sm shadow-md shadow-[#ff5733]/25 active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#ff5733] focus:ring-offset-2"
+            className="w-full h-11 min-h-[44px] mt-2 flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#ff603e] to-[#ff4724] hover:from-[#f5522e] hover:to-[#e63c1a] text-white font-medium text-sm shadow-md shadow-[#ff5733]/25 active:scale-[0.99] transition-all disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#ff5733] focus:ring-offset-2"
             data-testid="sign-up-submit"
           >
             <span>{loading ? "Creating account…" : "Create account"}</span>
