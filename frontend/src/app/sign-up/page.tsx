@@ -84,11 +84,13 @@ export default function SignUpPage() {
             }
             setFieldErrors(serverErrors);
           }
+        } else if (err.code === "DATABASE_UNAVAILABLE" || err.status === 500) {
+          setErrorMsg(err.message || "Database connection failed. Please ensure PostgreSQL is running on port 5432.");
         } else {
           setErrorMsg(err.message || "Account creation failed. Please try again.");
         }
       } else {
-        setErrorMsg("Network error. Please verify your connection.");
+        setErrorMsg("Unable to connect to backend server. Please verify backend is running at http://localhost:8000.");
       }
     } finally {
       setLoading(false);

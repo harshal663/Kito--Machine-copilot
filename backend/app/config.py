@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
     JWT_SECRET: str = "change-me-to-32-plus-random-bytes"
     JWT_EXPIRES_HOURS: int = 12
-    CORS_ORIGINS: str = "http://localhost:3000"
+    CORS_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000"
     UPLOAD_DIR: str = "./uploads"
     LOG_LEVEL: str = "INFO"
     EMBEDDING_BACKEND: Literal["hash", "local"] = "hash"

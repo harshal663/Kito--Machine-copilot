@@ -31,7 +31,7 @@ def setup_middleware(app: FastAPI) -> None:
         start_time = time.perf_counter()
         try:
             response: Response = await call_next(request)
-        except Exception:
+        except Exception as exc:
             duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
             logger.exception(
                 "request_failed",
@@ -39,7 +39,25 @@ def setup_middleware(app: FastAPI) -> None:
                 path=request.url.path,
                 duration_ms=duration_ms,
             )
-            raise
+            err_str = str(exc)
+            if "5432" in err_str or "Connect call failed" in err_str or "connection" in err_str.lower():
+                user_msg = "Database connection failed. Please ensure PostgreSQL is running on port 5432."
+                code = "DATABASE_UNAVAILABLE"
+            else:
+                user_msg = "Internal server error occurred."
+                code = "INTERNAL_ERROR"
+            return JSONResponse(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                headers={"X-Request-ID": req_id},
+                content={
+                    "error": {
+                        "code": code,
+                        "message": user_msg,
+                        "request_id": req_id,
+                        "details": {},
+                    }
+                },
+            )
 
         duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
         response.headers["X-Request-ID"] = req_id

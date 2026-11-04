@@ -89,6 +89,8 @@ export default function SignInPage() {
           setErrorMsg("Too many attempts. Try again later.");
         } else if (err.code === "UNAUTHENTICATED" || err.status === 401) {
           setErrorMsg("Email or password is incorrect.");
+        } else if (err.code === "DATABASE_UNAVAILABLE" || err.status === 500) {
+          setErrorMsg(err.message || "Database connection failed. Please ensure PostgreSQL is running on port 5432.");
         } else {
           setErrorMsg(err.message || "Email or password is incorrect.");
         }

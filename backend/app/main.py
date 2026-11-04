@@ -43,7 +43,10 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    # CORS configuration
+    # Standard error handling and request tracing
+    setup_middleware(app)
+
+    # CORS configuration (outermost so all error responses retain CORS headers)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins_list or ["*"],
@@ -52,9 +55,6 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
         expose_headers=["X-Request-ID"],
     )
-
-    # Standard error handling and request tracing
-    setup_middleware(app)
 
     # Register routers
     app.include_router(health.router)
