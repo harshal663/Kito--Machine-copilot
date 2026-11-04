@@ -116,7 +116,7 @@ jobs:
           cd backend && uv sync
           uv run python ../scripts/export_openapi.py
           cd ../frontend && npm ci && npm run generate-types
-          git diff --exit-code -- ../docs/openapi.json src/types/api.generated.ts
+          git diff --exit-code -- src/types/api.generated.ts
 
   firmware:
     runs-on: ubuntu-latest

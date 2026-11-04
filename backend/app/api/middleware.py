@@ -40,8 +40,14 @@ def setup_middleware(app: FastAPI) -> None:
                 duration_ms=duration_ms,
             )
             err_str = str(exc)
-            if "5432" in err_str or "Connect call failed" in err_str or "connection" in err_str.lower():
-                user_msg = "Database connection failed. Please ensure PostgreSQL is running on port 5432."
+            if (
+                "5432" in err_str
+                or "Connect call failed" in err_str
+                or "connection" in err_str.lower()
+            ):
+                user_msg = (
+                    "Database connection failed. Please ensure PostgreSQL is running on port 5432."
+                )
                 code = "DATABASE_UNAVAILABLE"
             else:
                 user_msg = "Internal server error occurred."

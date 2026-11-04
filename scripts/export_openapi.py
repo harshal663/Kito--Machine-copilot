@@ -14,6 +14,7 @@ from app.main import app  # noqa: E402
 def export_openapi() -> None:
     """Generate OpenAPI schema and write to docs/openapi.json."""
     output_path = Path(__file__).resolve().parents[1] / "docs" / "openapi.json"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     openapi_schema = app.openapi()
 
     with open(output_path, "w", encoding="utf-8", newline="\n") as f:
